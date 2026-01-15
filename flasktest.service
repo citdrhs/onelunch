@@ -1,5 +1,5 @@
 [Unit]
-Description=Gunicorn instance to serve flasktest
+Description=Gunicorn instance to serve onelunch
 After=network.target
 
 [Service]
