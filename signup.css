@@ -1,0 +1,105 @@
+body {
+  margin: 0;
+  background: #ffffff;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.container {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+input {
+  width: 100%;
+  padding: 14px 46px 14px 16px;
+  border-radius: 999px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+input:focus {
+  outline: none;
+  border-color: #0057d9;
+}
+
+.password .eye {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 18px;
+}
+
+.primary-btn {
+  width: 100%;
+  border-radius: 999px;
+  border: none;
+  background: #0057d9;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.primary-btn:hover {
+  background: #0046b3;
+}
+
+.divider {
+  align-items: center;
+  margin: 24px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #ccc;
+}
+
+.divider span {
+  padding: 0 12px;
+  color: #666;
+}
+
+.google-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 999px;
+  border: 1px solid #ccc;
+  background: white;
+  font-size: 15px;
+}
+
+.google-btn:hover {
+  background: #f6f6f6;
+}
+
+.login-link {
+  margin-top: 24px;
+  font-size: 14px;
+}
+
+.login-link a {
+  color: #0057d9;
+  text-decoration: none;
+}
