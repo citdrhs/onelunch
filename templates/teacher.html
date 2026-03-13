@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Set availability — Onelunch{% endblock %}
+{% block content %}
+<section class="teacher-section">
+  <div class="reveal">
+    <h1>Set your room availability</h1>
+    <p class="subtitle">When is your room open at lunch? Students see this so they know where to go.</p>
+  </div>
+
+  {% if user_room %}
+  <p class="my-room-link reveal"><a href="{{ url_for('student') }}#room-{{ user_room.number }}" class="btn btn-secondary">View my room ({{ user_room.number }}) on the map</a></p>
+  {% endif %}
+
+  {% if confirm_overwrite %}
+  <div class="flash error reveal">Room {{ confirm_overwrite }} is already assigned. Check the box below to confirm you want to take it over.</div>
+  {% endif %}
+
+  <form class="teacher-form card reveal" method="post" action="{{ url_for('teacher') }}" id="teacher-form">
+    <div class="input-group">
+      <label for="room">Room number</label>
+      <input type="text" id="room" name="room" placeholder="e.g. 230" required value="{{ confirm_overwrite or (user_room.number if user_room else '') }}">
+    </div>
+    <div class="input-group">
+      <label>Your name</label>
+      <input type="text" disabled value="{{ user.name }}">
+    </div>
+    {% if departments %}
+    <div class="department-defaults">
+      <label>Load department template</label>
+      <select id="department-template">
+        <option value="">— Select to load —</option>
+        {% for d in departments %}
+        <option value="{{ d.department }}" data-office="{{ d.office_hours or '' }}" data-duty="{{ d.lunch_duty or '' }}" data-avail="{{ d.default_avail | tojson | e }}">{{ d.department }}</option>
+        {% endfor %}
+      </select>
+      <button type="button" class="btn btn-secondary btn-sm" id="load-department-btn">Load template</button>
+    </div>
+    {% endif %}
+    <div class="input-group">
+      <label for="department">Department (optional)</label>
+      <input type="text" id="department" name="department" placeholder="e.g. History" value="{{ user_room.department if user_room else (user.department or '') }}">
+    </div>
+    <div class="input-group">
+      <label for="office_hours">Office hours</label>
+      <input type="text" id="office_hours" name="office_hours" placeholder="e.g. Wed & Thu B lunch; M–F 3–4pm" value="{{ user_room.office_hours if user_room else '' }}">
+    </div>
+    <div class="input-group">
+      <label for="lunch_duty">Lunch duty (when you’re not in room)</label>
+      <input type="text" id="lunch_duty" name="lunch_duty" placeholder="e.g. Wed & Fri A lunch" value="{{ user_room.lunch_duty if user_room else '' }}">
+    </div>
+    <div class="input-group">
+      <label for="club_meeting">Club meeting (if any)</label>
+      <input type="text" id="club_meeting" name="club_meeting" placeholder="e.g. Chess Club Thurs B lunch" value="{{ user_room.club_meeting if user_room else '' }}">
+    </div>
+    <fieldset class="days-fieldset">
+      <legend>Open for lunch (per day)</legend>
+      <div>
+        {% set map = user_room.avail_map if user_room else {} %}
+        <label>Mon <select name="day_M" id="day_M">
+          <option value="N" {% if map.get('M') == 'N' %}selected{% endif %}>Closed</option>
+          <option value="A" {% if map.get('M') == 'A' %}selected{% endif %}>A lunch</option>
+          <option value="B" {% if map.get('M') == 'B' %}selected{% endif %}>B lunch</option>
+          <option value="AB" {% if map.get('M') == 'AB' %}selected{% endif %}>Both lunches</option>
+        </select></label>
+        <label>Tue <select name="day_T" id="day_T">
+          <option value="N" {% if map.get('T') == 'N' %}selected{% endif %}>Closed</option>
+          <option value="A" {% if map.get('T') == 'A' %}selected{% endif %}>A lunch</option>
+          <option value="B" {% if map.get('T') == 'B' %}selected{% endif %}>B lunch</option>
+          <option value="AB" {% if map.get('T') == 'AB' %}selected{% endif %}>Both lunches</option>
+        </select></label>
+        <label>Wed <select name="day_W" id="day_W">
+          <option value="N" {% if map.get('W') == 'N' %}selected{% endif %}>Closed</option>
+          <option value="A" {% if map.get('W') == 'A' %}selected{% endif %}>A lunch</option>
+          <option value="B" {% if map.get('W') == 'B' %}selected{% endif %}>B lunch</option>
+          <option value="AB" {% if map.get('W') == 'AB' %}selected{% endif %}>Both lunches</option>
+        </select></label>
+        <label>Thu <select name="day_R" id="day_R">
+          <option value="N" {% if map.get('R') == 'N' %}selected{% endif %}>Closed</option>
+          <option value="A" {% if map.get('R') == 'A' %}selected{% endif %}>A lunch</option>
+          <option value="B" {% if map.get('R') == 'B' %}selected{% endif %}>B lunch</option>
+          <option value="AB" {% if map.get('R') == 'AB' %}selected{% endif %}>Both lunches</option>
+        </select></label>
+        <label>Fri <select name="day_F" id="day_F">
+          <option value="N" {% if map.get('F') == 'N' %}selected{% endif %}>Closed</option>
+          <option value="A" {% if map.get('F') == 'A' %}selected{% endif %}>A lunch</option>
+          <option value="B" {% if map.get('F') == 'B' %}selected{% endif %}>B lunch</option>
+          <option value="AB" {% if map.get('F') == 'AB' %}selected{% endif %}>Both lunches</option>
+        </select></label>
+      </div>
+    </fieldset>
+    {% if confirm_overwrite %}
+    <label class="confirm-overwrite">
+      <input type="checkbox" name="confirm_overwrite" value="1" required> I confirm I want to take over room {{ confirm_overwrite }}
+    </label>
+    {% endif %}
+    <button type="submit" class="btn btn-primary btn-submit">Save availability</button>
+  </form>
+
+  <div class="current-rooms card reveal">
+    <h2>All rooms</h2>
+    {% if rooms %}
+    <ul class="room-list">
+      {% for r in rooms %}
+      <li><strong>Room {{ r.number }}</strong> — {{ r.teacher_name or '—' }} · {{ r.office_hours or '—' }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No rooms yet. Add yours above.</p>
+    {% endif %}
+  </div>
+</section>
+<script>
+(function() {
+  var sel = document.getElementById('department-template');
+  var loadBtn = document.getElementById('load-department-btn');
+  if (sel && loadBtn) {
+    loadBtn.addEventListener('click', function() {
+      var opt = sel.options[sel.selectedIndex];
+      if (!opt || !opt.value) return;
+      var office = opt.getAttribute('data-office') || '';
+      var duty = opt.getAttribute('data-duty') || '';
+      document.getElementById('office_hours').value = office;
+      document.getElementById('lunch_duty').value = duty;
+      try {
+        var avail = JSON.parse(opt.getAttribute('data-avail') || '{}');
+        ['M','T','W','R','F'].forEach(function(d) {
+          var el = document.getElementById('day_' + d);
+          if (el && avail[d]) el.value = avail[d];
+        });
+      } catch (e) {}
+    });
+  }
+})();
+</script>
+{% endblock %}

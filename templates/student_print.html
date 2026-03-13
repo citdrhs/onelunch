@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Onelunch — Open rooms (print)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body { max-width: 800px; margin: 0 auto; padding: 16px; }
+        .no-print-nav { display: none !important; }
+        .print-only { }
+        h1 { font-size: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f5f5f0; }
+        @media print {
+            .no-print { display: none !important; }
+            a[href]:after { content: none !important; }
+        }
+    </style>
+</head>
+<body class="print-view">
+    <h1>Onelunch — Open rooms this week</h1>
+    <p><strong>Today:</strong> {{ current_day }} lunch {{ current_lunch }}</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Room</th>
+                <th>Teacher</th>
+                <th>Office hours</th>
+                <th>Lunch duty</th>
+                <th>Club</th>
+                <th>Available (A/B)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for number, data in rooms_sorted %}
+            <tr>
+                <td>{{ number }}</td>
+                <td>{{ data.teacher_name or '—' }}</td>
+                <td>{{ data.office_hours or '—' }}</td>
+                <td>{{ data.lunch_duty or '—' }}</td>
+                <td>{{ data.club_meeting or '—' }}</td>
+                <td>
+                    {% set am = data.get('availability_map') or {} %}
+                    {% for d in ['M','T','W','R','F'] %}
+                        {{ d }}:{{ am.get(d, 'N') }}{% if not loop.last %} · {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6">No rooms entered yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p class="muted" style="margin-top:16px;font-size:12px;">Generated from Onelunch. M=Mon … F=Fri; A/B = lunch period.</p>
+</body>
+</html>

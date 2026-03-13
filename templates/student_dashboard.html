@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard — Onelunch{% endblock %}
+{% block content %}
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header reveal">
+    <div>
+      <h1>👋 Welcome, {{ user.name }}!</h1>
+      <p class="subtitle">Find lunch rooms, save favorites, and request club meetings</p>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="stats-grid reveal">
+    <div class="stat-card">
+      <div class="stat-icon">🏠</div>
+      <div class="stat-content">
+        <p class="stat-label">Favorite Rooms</p>
+        <p class="stat-value">3</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📋</div>
+      <div class="stat-content">
+        <p class="stat-label">Club Requests</p>
+        <p class="stat-value">2</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-content">
+        <p class="stat-label">Awaiting Approval</p>
+        <p class="stat-value">1</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-content">
+        <p class="stat-label">Room Finder</p>
+        <p class="stat-value">Map</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Actions -->
+  <div class="dashboard-grid reveal">
+    <!-- Find Rooms Card -->
+    <section class="card action-card">
+      <h2>🔍 Find a Room</h2>
+      <p>Browse available lunch rooms and see where your friends are.</p>
+      <a href="{{ url_for('student') }}" class="btn btn-primary btn-block">
+        Explore Rooms
+      </a>
+    </section>
+
+    <!-- Request Club Meeting Card -->
+    <section class="card action-card">
+      <h2>📝 Request Club Meeting</h2>
+      <p>Submit a request to use a room for your club meeting. Teachers will approve it.</p>
+      <a href="{{ url_for('club_request') }}" class="btn btn-primary btn-block">
+        Request Room
+      </a>
+    </section>
+  </div>
+
+  <!-- Recent Club Requests -->
+  <section class="card reveal">
+    <h2>📋 Your Recent Club Requests</h2>
+    <div class="request-timeline">
+      <div class="timeline-item pending">
+        <div class="timeline-marker">⏳</div>
+        <div class="timeline-content">
+          <h4>Chess Club</h4>
+          <p>Room 203 • Monday A Lunch</p>
+          <span class="badge pending">Pending Review</span>
+        </div>
+        <div class="timeline-time">2 days ago</div>
+      </div>
+      
+      <div class="timeline-item approved">
+        <div class="timeline-marker">✅</div>
+        <div class="timeline-content">
+          <h4>Coding Club</h4>
+          <p>Room 201 • Wednesday B Lunch</p>
+          <span class="badge approved">Approved</span>
+        </div>
+        <div class="timeline-time">1 week ago</div>
+      </div>
+
+      <div class="timeline-item approved">
+        <div class="timeline-marker">✅</div>
+        <div class="timeline-content">
+          <h4>Art Club</h4>
+          <p>Room 205 • Friday A Lunch</p>
+          <span class="badge approved">Approved</span>
+        </div>
+        <div class="timeline-time">2 weeks ago</div>
+      </div>
+    </div>
+    
+    <div class="action-buttons">
+      <a href="{{ url_for('club_request') }}" class="btn btn-secondary">View All Requests</a>
+    </div>
+  </section>
+
+  <!-- Quick Links -->
+  <section class="card reveal">
+    <h2>⚡ Quick Links</h2>
+    <div class="quick-links">
+      <a href="{{ url_for('map') }}" class="quick-link">
+        <span class="icon">🗺️</span>
+        <span class="label">Floor Map</span>
+      </a>
+      <a href="{{ url_for('student') }}" class="quick-link">
+        <span class="icon">🏠</span>
+        <span class="label">Room Finder</span>
+      </a>
+      <a href="{{ url_for('club_request') }}" class="quick-link">
+        <span class="icon">📝</span>
+        <span class="label">Club Requests</span>
+      </a>
+      <a href="{{ url_for('account') }}" class="quick-link">
+        <span class="icon">👤</span>
+        <span class="label">My Account</span>
+      </a>
+    </div>
+  </section>
+</div>
+{% endblock %}

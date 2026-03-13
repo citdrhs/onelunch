@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Teacher Dashboard — Onelunch{% endblock %}
+{% block content %}
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header reveal">
+    <div>
+      <h1>👋 Welcome, {{ user.name }}!</h1>
+      <p class="subtitle">Manage your availability and review club meeting requests</p>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="stats-grid reveal">
+    <div class="stat-card">
+      <div class="stat-icon">🏠</div>
+      <div class="stat-content">
+        <p class="stat-label">My Rooms</p>
+        <p class="stat-value">3</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-content">
+        <p class="stat-label">Pending Requests</p>
+        <p class="stat-value">2</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-content">
+        <p class="stat-label">Approved</p>
+        <p class="stat-value">5</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📅</div>
+      <div class="stat-content">
+        <p class="stat-label">Week Schedule</p>
+        <p class="stat-value">Set</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Actions -->
+  <div class="dashboard-grid reveal">
+    <!-- Review Requests Card -->
+    <section class="card action-card">
+      <h2>📋 Review Requests</h2>
+      <p>Review and approve or reject club meeting requests from students. 2 pending.</p>
+      <a href="{{ url_for('club_request') }}" class="btn btn-primary btn-block">
+        Review Requests
+      </a>
+    </section>
+
+    <!-- Manage Availability Card -->
+    <section class="card action-card">
+      <h2>⏰ Manage Your Availability</h2>
+      <p>Set which lunch periods you can host club meetings in your room.</p>
+      <a href="{{ url_for('teacher') }}" class="btn btn-primary btn-block">
+        Set Schedule
+      </a>
+    </section>
+  </div>
+
+  <!-- Pending Requests Summary -->
+  <section class="card reveal">
+    <h2>⏳ Pending Club Meeting Requests</h2>
+    
+    <div class="pending-requests">
+      <div class="request-item pending">
+        <div class="request-info">
+          <h4>Chess Club</h4>
+          <div class="request-meta">
+            <span class="meta-item">📍 Room 203</span>
+            <span class="meta-item">📅 Monday</span>
+            <span class="meta-item">🕐 A Lunch (11:00 - 11:30)</span>
+            <span class="meta-item">👤 John Smith</span>
+          </div>
+        </div>
+        <div class="request-actions">
+          <form method="post" action="{{ url_for('club_request_review', req_id=1, action='approve') }}" style="display: inline;">
+            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+          </form>
+          <form method="post" action="{{ url_for('club_request_review', req_id=1, action='reject') }}" style="display: inline;">
+            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="request-item pending">
+        <div class="request-info">
+          <h4>Coding Club</h4>
+          <div class="request-meta">
+            <span class="meta-item">📍 Room 201</span>
+            <span class="meta-item">📅 Wednesday</span>
+            <span class="meta-item">🕐 B Lunch (11:30 - 12:00)</span>
+            <span class="meta-item">👤 Sarah Johnson</span>
+          </div>
+        </div>
+        <div class="request-actions">
+          <form method="post" action="{{ url_for('club_request_review', req_id=2, action='approve') }}" style="display: inline;">
+            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+          </form>
+          <form method="post" action="{{ url_for('club_request_review', req_id=2, action='reject') }}" style="display: inline;">
+            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: var(--space-4);">
+      <a href="{{ url_for('club_request') }}" class="btn btn-secondary">View All Requests</a>
+    </div>
+  </section>
+
+  <!-- Your Availability Summary -->
+  <section class="card reveal">
+    <h2>📅 Your Availability This Week</h2>
+    <div class="availability-grid">
+      <div class="availability-card">
+        <p class="day">Monday</p>
+        <p class="lunch">A & B Lunch</p>
+        <span class="status-badge approved">Available</span>
+      </div>
+      <div class="availability-card">
+        <p class="day">Tuesday</p>
+        <p class="lunch">A Lunch</p>
+        <span class="status-badge approved">Available</span>
+      </div>
+      <div class="availability-card">
+        <p class="day">Wednesday</p>
+        <p class="lunch">B Lunch</p>
+        <span class="status-badge approved">Available</span>
+      </div>
+      <div class="availability-card">
+        <p class="day">Thursday</p>
+        <p class="lunch">—</p>
+        <span class="status-badge rejected">Not Available</span>
+      </div>
+      <div class="availability-card">
+        <p class="day">Friday</p>
+        <p class="lunch">A & B Lunch</p>
+        <span class="status-badge approved">Available</span>
+      </div>
+    </div>
+    <a href="{{ url_for('teacher') }}" class="btn btn-secondary" style="margin-top: var(--space-4);">Edit Schedule</a>
+  </section>
+
+  <!-- Quick Links -->
+  <section class="card reveal">
+    <h2>⚡ Quick Links</h2>
+    <div class="quick-links">
+      <a href="{{ url_for('club_request') }}" class="quick-link">
+        <span class="icon">📋</span>
+        <span class="label">Club Requests</span>
+      </a>
+      <a href="{{ url_for('teacher') }}" class="quick-link">
+        <span class="icon">⏰</span>
+        <span class="label">My Schedule</span>
+      </a>
+      <a href="{{ url_for('student') }}" class="quick-link">
+        <span class="icon">📚</span>
+        <span class="label">Room Map</span>
+      </a>
+      <a href="{{ url_for('account') }}" class="quick-link">
+        <span class="icon">👤</span>
+        <span class="label">My Account</span>
+      </a>
+    </div>
+  </section>
+</div>
+{% endblock %}

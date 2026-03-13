@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Onelunch — Find your spot at lunch{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-inner reveal">
+    <h1>Find your spot at lunch.</h1>
+    <p class="hero-lead">See which rooms are open, who’s there, and where you belong. No guessing—just go.</p>
+    <div class="role-links">
+      <a href="{{ url_for('student') }}" class="btn btn-primary btn-lg">View open rooms</a>
+      <a href="{{ url_for('map') }}" class="btn btn-secondary">School map</a>
+      {% if not user %}
+      <a href="{{ url_for('login') }}" class="btn btn-secondary">Log in</a>
+      <a href="{{ url_for('register') }}" class="btn btn-ghost">Create account</a>
+      {% else %}
+      {% if user.role in ('teacher', 'admin') %}
+      <a href="{{ url_for('teacher') }}" class="btn btn-primary">Set my availability</a>
+      {% endif %}
+      {% if user.role == 'student' %}
+      <a href="{{ url_for('student') }}" class="btn btn-primary">Find rooms</a>
+      {% endif %}
+      <a href="{{ url_for('account') }}" class="btn btn-ghost">Account</a>
+      {% endif %}
+    </div>
+    {% if user %}
+    <p class="hero-muted">Signed in as {{ user.name }} · {{ user.role }}</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

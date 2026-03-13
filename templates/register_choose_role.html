@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Sign up — Onelunch{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="container">
+    <h1>Choose your role</h1>
+    <p class="subtitle">Select what you are to get started</p>
+    <div class="role-buttons reveal">
+      <a href="{{ url_for('register_teacher') }}" class="btn btn-primary btn-lg">
+        <div class="role-icon">📚</div>
+        <div class="role-label">Teacher</div>
+      </a>
+      <a href="{{ url_for('register_student') }}" class="btn btn-secondary btn-lg">
+        <div class="role-icon">👨‍🎓</div>
+        <div class="role-label">Student</div>
+      </a>
+      <a href="{{ url_for('register_admin') }}" class="btn btn-secondary btn-lg">
+        <div class="role-icon">⚙️</div>
+        <div class="role-label">Admin</div>
+      </a>
+    </div>
+    <div class="divider"><span>or</span></div>
+    <div class="login-link">Already have an account? <a href="{{ url_for('login') }}">Log in</a></div>
+  </div>
+</div>
+
+<style>
+.role-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: var(--space-6) 0;
+}
+
+.role-buttons .btn-lg {
+  padding: var(--space-6) var(--space-8);
+  flex-direction: column;
+  gap: var(--space-3);
+  text-decoration: none;
+  border-radius: var(--radius-xl);
+  transition: all var(--duration-normal);
+}
+
+.role-buttons .btn-lg:hover {
+  transform: translateY(-4px);
+}
+
+.role-icon {
+  font-size: var(--text-3xl);
+  line-height: 1;
+}
+
+.role-label {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+@media (min-width: 640px) {
+  .role-buttons {
+    flex-direction: row;
+  }
+  
+  .role-buttons .btn-lg {
+    flex: 1;
+  }
+}
+</style>
+{% endblock %}

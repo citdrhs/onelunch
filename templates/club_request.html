@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}Club Requests — Onelunch{% endblock %}
+{% block content %}
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header reveal">
+    <div>
+      <h1>Club Meeting Requests</h1>
+      <p class="subtitle">Student requests for club meeting spaces approved by teachers</p>
+    </div>
+  </div>
+
+  <!-- Student Request Section -->
+  {% if session.role == 'student' %}
+  <div class="card reveal">
+    <h2>📝 Request a Club Meeting</h2>
+    <p>Submit a request for a room to hold your club meeting. Teachers will review and approve based on availability.</p>
+    
+    <form method="post" action="{{ url_for('club_request') }}" class="form-grid">
+      <div class="form-group">
+        <label for="club_name">Club Name *</label>
+        <input 
+          type="text" 
+          id="club_name" 
+          name="club_name" 
+          placeholder="e.g., Chess Club, Coding Club" 
+          required
+          aria-label="Club Name"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="room_id">Room *</label>
+        <select id="room_id" name="room_id" required aria-label="Select Room">
+          <option value="">— Select room —</option>
+          {% for r in rooms %}
+          <option value="{{ r.id }}">Room {{ r.number }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="day">Day of Week *</label>
+        <select id="day" name="day" required aria-label="Select Day">
+          <option value="M">Monday</option>
+          <option value="T">Tuesday</option>
+          <option value="W">Wednesday</option>
+          <option value="R">Thursday</option>
+          <option value="F">Friday</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="lunch">Lunch Period *</label>
+        <select id="lunch" name="lunch" required aria-label="Select Lunch Period">
+          <option value="A">A Lunch (11:00 - 11:30)</option>
+          <option value="B">B Lunch (11:30 - 12:00)</option>
+        </select>
+      </div>
+
+      <div class="form-actions" style="grid-column: 1 / -1;">
+        <button type="submit" class="btn btn-primary">Submit Request</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Student's Requests -->
+  <div class="card reveal">
+    <h2>📋 Your Requests</h2>
+    {% if requests_list %}
+      {% set pending = [r for r in requests_list if r.status == 'pending'] %}
+      {% set approved = [r for r in requests_list if r.status == 'approved'] %}
+      {% set rejected = [r for r in requests_list if r.status == 'rejected'] %}
+
+      {% if pending %}
+      <div class="request-section">
+        <h3>⏳ Pending Review</h3>
+        <div class="request-grid">
+          {% for req in pending %}
+          <div class="request-card status-pending">
+            <div class="request-header">
+              <h4>{{ req.club_name }}</h4>
+              <span class="status-badge pending">Pending</span>
+            </div>
+            <div class="request-details">
+              <p><strong>Room:</strong> {{ req.room_number }}</p>
+              <p><strong>Day:</strong> {{ ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][['M', 'T', 'W', 'R', 'F'].index(req.day)] }}</p>
+              <p><strong>Lunch:</strong> {{ req.lunch }} Lunch</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if approved %}
+      <div class="request-section">
+        <h3>✅ Approved</h3>
+        <div class="request-grid">
+          {% for req in approved %}
+          <div class="request-card status-approved">
+            <div class="request-header">
+              <h4>{{ req.club_name }}</h4>
+              <span class="status-badge approved">Approved</span>
+            </div>
+            <div class="request-details">
+              <p><strong>Room:</strong> {{ req.room_number }}</p>
+              <p><strong>Day:</strong> {{ ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][['M', 'T', 'W', 'R', 'F'].index(req.day)] }}</p>
+              <p><strong>Lunch:</strong> {{ req.lunch }} Lunch</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if rejected %}
+      <div class="request-section">
+        <h3>❌ Rejected</h3>
+        <div class="request-grid">
+          {% for req in rejected %}
+          <div class="request-card status-rejected">
+            <div class="request-header">
+              <h4>{{ req.club_name }}</h4>
+              <span class="status-badge rejected">Rejected</span>
+            </div>
+            <div class="request-details">
+              <p><strong>Room:</strong> {{ req.room_number }}</p>
+              <p><strong>Day:</strong> {{ ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][['M', 'T', 'W', 'R', 'F'].index(req.day)] }}</p>
+              <p><strong>Lunch:</strong> {{ req.lunch }} Lunch</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    {% else %}
+      <p class="empty-state">No requests submitted yet. Create one above to get started!</p>
+    {% endif %}
+  </div>
+
+  <!-- Teacher/Admin Review Section -->
+  {% elif session.role in ('teacher', 'admin') %}
+  <div class="card reveal">
+    <h2>🔍 Review Club Meeting Requests</h2>
+    
+    {% if requests_list %}
+      {% set pending = [r for r in requests_list if r.status == 'pending'] %}
+      {% set approved = [r for r in requests_list if r.status == 'approved'] %}
+      {% set rejected = [r for r in requests_list if r.status == 'rejected'] %}
+
+      {% if pending %}
+      <div class="request-section">
+        <h3>⏳ Pending Requests ({{ pending|length }})</h3>
+        <div class="request-queue">
+          {% for req in pending %}
+          <div class="request-item pending">
+            <div class="request-info">
+              <h4>{{ req.club_name }}</h4>
+              <div class="request-meta">
+                <span class="meta-item">📍 Room {{ req.room_number }}</span>
+                <span class="meta-item">📅 {{ ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'][['M', 'T', 'W', 'R', 'F'].index(req.day)] }}</span>
+                <span class="meta-item">🕐 {{ req.lunch }} Lunch</span>
+                <span class="meta-item">👤 {{ req.requested_by or 'Unknown' }}</span>
+              </div>
+            </div>
+            <div class="request-actions">
+              <form method="post" action="{{ url_for('club_request_review', req_id=req.id, action='approve') }}" style="display: inline;">
+                <button type="submit" class="btn btn-success btn-sm" aria-label="Approve request for {{ req.club_name }}">
+                  ✓ Approve
+                </button>
+              </form>
+              <form method="post" action="{{ url_for('club_request_review', req_id=req.id, action='reject') }}" style="display: inline;">
+                <button type="submit" class="btn btn-danger btn-sm" aria-label="Reject request for {{ req.club_name }}">
+                  ✕ Reject
+                </button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if approved %}
+      <div class="request-section">
+        <h3>✅ Approved Requests ({{ approved|length }})</h3>
+        <div class="request-queue">
+          {% for req in approved %}
+          <div class="request-item approved">
+            <div class="request-info">
+              <h4>{{ req.club_name }}</h4>
+              <div class="request-meta">
+                <span class="meta-item">📍 Room {{ req.room_number }}</span>
+                <span class="meta-item">📅 {{ ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'][['M', 'T', 'W', 'R', 'F'].index(req.day)] }}</span>
+                <span class="meta-item">🕐 {{ req.lunch }} Lunch</span>
+                <span class="meta-item">👤 {{ req.requested_by or 'Unknown' }}</span>
+              </div>
+            </div>
+            <span class="status-badge approved">Approved</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if rejected %}
+      <div class="request-section">
+        <h3>❌ Rejected Requests ({{ rejected|length }})</h3>
+        <div class="request-queue">
+          {% for req in rejected %}
+          <div class="request-item rejected">
+            <div class="request-info">
+              <h4>{{ req.club_name }}</h4>
+              <div class="request-meta">
+                <span class="meta-item">📍 Room {{ req.room_number }}</span>
+                <span class="meta-item">📅 {{ ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'][['M', 'T', 'W', 'R', 'F'].index(req.day)] }}</span>
+                <span class="meta-item">🕐 {{ req.lunch }} Lunch</span>
+                <span class="meta-item">👤 {{ req.requested_by or 'Unknown' }}</span>
+              </div>
+            </div>
+            <span class="status-badge rejected">Rejected</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    {% else %}
+      <p class="empty-state">No requests yet. Students will see this page when they submit requests.</p>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

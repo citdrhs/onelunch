@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Admin — Onelunch{% endblock %}
+{% block content %}
+<div class="page-card admin-page">
+  <div class="reveal">
+    <h1>Admin</h1>
+    <p class="subtitle">Manage users, roles, and department templates.</p>
+  </div>
+  <nav class="admin-tabs reveal">
+    <a href="{{ url_for('admin') }}#users">Users</a>
+    <a href="{{ url_for('admin') }}#rooms">Rooms</a>
+    <a href="{{ url_for('admin_department_default') }}">Department defaults</a>
+  </nav>
+  <section class="card reveal" id="users">
+    <h2>Users</h2>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Department</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>{{ u.name }}</td>
+          <td>{{ u.email }}</td>
+          <td>
+            <form method="post" action="{{ url_for('admin_set_role', user_id=u.id) }}" class="inline-form">
+              <select name="role" onchange="this.form.submit()">
+                <option value="teacher" {% if u.role == 'teacher' %}selected{% endif %}>Teacher</option>
+                <option value="student" {% if u.role == 'student' %}selected{% endif %}>Student</option>
+                <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>Admin</option>
+                <option value="club_president" {% if u.role == 'club_president' %}selected{% endif %}>Club president</option>
+              </select>
+            </form>
+          </td>
+          <td>
+            <form method="post" action="{{ url_for('admin_set_department', user_id=u.id) }}" class="inline-form">
+              <input type="text" name="department" value="{{ u.department or '' }}" placeholder="Dept" size="10">
+              <button type="submit" class="btn btn-sm btn-secondary">Save</button>
+            </form>
+          </td>
+          <td>{{ u.created_at }}</td>
+          <td>
+            {% if u.id != session.user_id %}
+            <form method="post" action="{{ url_for('admin_delete_user', user_id=u.id) }}" class="inline-form" onsubmit="return confirm('Delete this user?');">
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">No users.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  <section class="card reveal" id="rooms">
+    <h2>Rooms</h2>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Room</th>
+          <th>Teacher</th>
+          <th>Office hours</th>
+          <th>Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rooms %}
+        <tr>
+          <td>{{ r.number }}</td>
+          <td>{{ r.teacher_name or '—' }}</td>
+          <td>{{ r.office_hours or '—' }}</td>
+          <td>{{ r.updated_at }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4">No rooms.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+{% endblock %}

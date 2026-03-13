@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}School Map — Onelunch{% endblock %}
+{% block content %}
+<section class="map-section">
+  <div class="reveal">
+    <h1>School Map</h1>
+    <p class="subtitle">Find your way around campus. Room locations and floor plans.</p>
+  </div>
+
+  <div class="map-container card reveal">
+    <div class="floor-tabs">
+      <button class="floor-tab active" onclick="showFloor('first')">First Floor</button>
+      <button class="floor-tab" onclick="showFloor('second')">Second Floor</button>
+    </div>
+
+    <div id="first-floor" class="floor-map active">
+      <h3>First Floor</h3>
+      <div class="map-placeholder">
+        <div class="map-note">
+          <p><strong>Coming Soon:</strong> Interactive floor plan with room locations</p>
+          <p>This map will show:</p>
+          <ul>
+            <li>Classroom locations and room numbers</li>
+            <li>Office locations</li>
+            <li>Common areas and facilities</li>
+            <li>Navigation between floors</li>
+          </ul>
+        </div>
+        <div class="map-canvas">
+          <!-- Placeholder for SVG or image map -->
+          <svg width="800" height="600" viewBox="0 0 800 600" style="border: 1px solid var(--color-border); background: var(--color-surface);">
+            <text x="400" y="300" text-anchor="middle" fill="var(--color-text-muted)" font-size="24">First Floor Map</text>
+            <text x="400" y="330" text-anchor="middle" fill="var(--color-text-muted)" font-size="16">Coming Soon</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div id="second-floor" class="floor-map">
+      <h3>Second Floor</h3>
+      <div class="map-placeholder">
+        <div class="map-note">
+          <p><strong>Coming Soon:</strong> Interactive floor plan with room locations</p>
+          <p>This map will show:</p>
+          <ul>
+            <li>Classroom locations and room numbers</li>
+            <li>Office locations</li>
+            <li>Common areas and facilities</li>
+            <li>Navigation between floors</li>
+          </ul>
+        </div>
+        <div class="map-canvas">
+          <!-- Placeholder for SVG or image map -->
+          <svg width="800" height="600" viewBox="0 0 800 600" style="border: 1px solid var(--color-border); background: var(--color-surface);">
+            <text x="400" y="300" text-anchor="middle" fill="var(--color-text-muted)" font-size="24">Second Floor Map</text>
+            <text x="400" y="330" text-anchor="middle" fill="var(--color-text-muted)" font-size="16">Coming Soon</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.map-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+.map-container {
+  padding: var(--space-6);
+}
+
+.floor-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.floor-tab {
+  padding: var(--space-3) var(--space-5);
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  transition: all var(--duration-fast);
+  font-weight: 600;
+}
+
+.floor-tab.active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.floor-tab:hover:not(.active) {
+  background: var(--color-primary-muted);
+  color: var(--color-primary);
+}
+
+.floor-map {
+  display: none;
+}
+
+.floor-map.active {
+  display: block;
+}
+
+.map-placeholder {
+  display: flex;
+  gap: var(--space-6);
+  align-items: flex-start;
+}
+
+.map-note {
+  flex: 1;
+  padding: var(--space-4);
+  background: var(--color-surface-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+.map-note ul {
+  margin: var(--space-3) 0 0 var(--space-4);
+}
+
+.map-note li {
+  margin-bottom: var(--space-2);
+}
+
+.map-canvas {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+}
+
+.map-canvas svg {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  .map-placeholder {
+    flex-direction: column;
+  }
+
+  .map-canvas {
+    order: -1;
+  }
+}
+</style>
+
+<script>
+function showFloor(floor) {
+  // Hide all floors
+  document.querySelectorAll('.floor-map').forEach(map => {
+    map.classList.remove('active');
+  });
+  document.querySelectorAll('.floor-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+
+  // Show selected floor
+  document.getElementById(floor + '-floor').classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+{% endblock %}

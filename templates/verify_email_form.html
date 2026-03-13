@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Verify Your Email — Onelunch{% endblock %}
+{% block content %}
+<div class="auth-container reveal">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1>Verify Your Email</h1>
+      <p>We sent a 6-digit code to <strong>{{ email }}</strong></p>
+    </div>
+
+    <form method="post" action="{{ url_for('verify_email_form') }}" class="auth-form">
+      <div class="input-group">
+        <label for="code">Verification Code</label>
+        <input 
+          type="text" 
+          id="code" 
+          name="code" 
+          placeholder="000000" 
+          maxlength="6"
+          pattern="[0-9]{6}"
+          inputmode="numeric"
+          required
+          aria-label="6-digit verification code"
+          autofocus
+        >
+        <p class=\"form-hint\">Enter the 6-digit code from your email (or check the terminal in development mode)</p>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Verify Email</button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Didn't receive a code?</p>
+      <a href="{{ url_for('resend_verification') }}" class="link">Send a new code</a>
+    </div>
+
+    <div class="auth-footer">
+      <p>Changed your mind?</p>
+      <a href="{{ url_for('register') }}" class="link">Back to registration</a>
+    </div>
+  </div>
+</div>
+
+<style>
+.form-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+#code {
+  font-size: 2em;
+  letter-spacing: 0.5em;
+  text-align: center;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+#code::placeholder {
+  letter-spacing: normal;
+  font-size: 1em;
+}
+</style>
+{% endblock %}

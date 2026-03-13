@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Log in — Onelunch{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="container">
+    <h1>Welcome back</h1>
+    <p class="subtitle">Log in to update your room or find where to go at lunch.</p>
+    <form class="login" method="post" action="{{ url_for('login') }}">
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="you@school.edu" required autocomplete="email">
+      </div>
+      <div class="input-group password">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+        <button type="button" class="eye" aria-label="Show password" onclick="togglePassword('password', this)">👁️</button>
+      </div>
+      <button type="submit" class="primary-btn">Log in</button>
+    </form>
+    <div class="login-link"><a href="{{ url_for('forgot_password') }}">Forgot password?</a></div>
+    <div class="login-link"><a href="{{ url_for('resend_verification') }}">Verify email with code</a></div>
+    <div class="divider"><span>or</span></div>
+    <div class="login-link">Don’t have an account? <a href="{{ url_for('register') }}">Sign up</a></div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Sign up as Teacher — Onelunch{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="container">
+    <h1>Create your teacher account</h1>
+    <p class="subtitle">Set your room availability and manage lunch periods.</p>
+    <form class="register" method="post" action="{{ url_for('register_teacher') }}">
+      <div class="input-group">
+        <label for="name">Full name</label>
+        <input type="text" id="name" name="name" placeholder="Your name" required autocomplete="name">
+      </div>
+      <div class="input-group">
+        <label for="email">School email</label>
+        <input type="email" id="email" name="email" placeholder="firstname@henrico.k12.va.us" required autocomplete="email" pattern=".*@henrico\.k12\.va\.us">
+        <small class="form-help">Must use @henrico.k12.va.us email address</small>
+      </div>
+      <div class="input-group password">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password">
+        <button type="button" class="eye" aria-label="Show password" onclick="togglePassword('password', this)">👁️</button>
+      </div>
+      <div class="input-group">
+        <label for="department">Department (optional)</label>
+        <input type="text" id="department" name="department" placeholder="e.g. History, Mathematics">
+      </div>
+      <button type="submit" class="primary-btn">Create teacher account</button>
+    </form>
+    <div class="divider"><span>or</span></div>
+    <div class="login-link"><a href="{{ url_for('register') }}">← Back to role selection</a> · <a href="{{ url_for('login') }}">Log in</a></div>
+  </div>
+</div>
+{% endblock %}

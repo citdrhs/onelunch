@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Find rooms — Onelunch{% endblock %}
+{% block content %}
+<section class="student-section">
+  <div class="section-head reveal">
+    <h1>Where can you go?</h1>
+    <p class="subtitle">Pick a day and lunch period. Tap a room for details—office hours, club meetings, and who’s there.</p>
+  </div>
+
+  <div class="today-banner reveal" id="today-banner">
+    <strong>Right now:</strong>
+    <span id="today-text">—</span>
+    <a href="{{ url_for('student_print') }}" target="_blank" class="btn btn-secondary btn-sm btn-print">Print / export</a>
+  </div>
+
+  <div class="map-legend reveal">
+    <span class="legend-item open">Open</span>
+    <span class="legend-item closed">Closed</span>
+  </div>
+
+  <div class="student-toolbar reveal">
+    <div class="student-filters">
+      <label>Day
+        <select id="filter-day">
+          <option value="ALL">All days</option>
+          <option value="M" {% if current_day == 'M' %}selected{% endif %}>Mon</option>
+          <option value="T" {% if current_day == 'T' %}selected{% endif %}>Tue</option>
+          <option value="W" {% if current_day == 'W' %}selected{% endif %}>Wed</option>
+          <option value="R" {% if current_day == 'R' %}selected{% endif %}>Thu</option>
+          <option value="F" {% if current_day == 'F' %}selected{% endif %}>Fri</option>
+        </select>
+      </label>
+      <label>Lunch
+        <select id="filter-lunch">
+          <option value="ANY">A or B</option>
+          <option value="A" {% if current_lunch == 'A' %}selected{% endif %}>A lunch</option>
+          <option value="B" {% if current_lunch == 'B' %}selected{% endif %}>B lunch</option>
+        </select>
+      </label>
+      <label>Sort
+        <select id="sort-by">
+          <option value="room">Room #</option>
+          <option value="teacher">Teacher</option>
+          <option value="open-today">Open now first</option>
+        </select>
+      </label>
+      <input type="text" id="search-rooms" placeholder="Search room or teacher…" class="search-input" aria-label="Search rooms">
+      <button type="button" id="filter-apply" class="btn btn-primary btn-sm">Apply</button>
+      <button type="button" id="filter-clear" class="btn btn-secondary btn-sm">Clear</button>
+    </div>
+  </div>
+
+  <div class="floor-map-wrap reveal" id="floor-map-wrap">
+    <h2>Room map</h2>
+    <div id="room-map" class="room-map" data-current-day="{{ current_day }}" data-current-lunch="{{ current_lunch }}"></div>
+  </div>
+
+  <div class="room-detail card" id="room-detail" aria-live="polite" hidden>
+    <h2 id="detail-title">Room details</h2>
+    <div id="detail-body"></div>
+    {% if user and user.role == 'student' %}
+    <button type="button" class="btn btn-ghost btn-sm btn-favorite" id="btn-favorite" data-room-id="">☆ Favorite</button>
+    {% endif %}
+    <button type="button" class="btn btn-secondary btn-sm btn-close-detail" id="close-detail">Close</button>
+  </div>
+
+  <div class="empty-state" id="empty-state" hidden>
+    <p>No rooms match these filters. Try a different day or clear filters.</p>
+    <button type="button" class="btn btn-secondary" id="empty-state-clear">Clear filters</button>
+  </div>
+
+  <div class="room-list-section reveal">
+    <h2>All rooms</h2>
+    <ul id="room-list-ul" class="room-list"></ul>
+  </div>
+</section>
+<script type="application/json" id="rooms-data">{{ rooms | tojson }}</script>
+<script type="application/json" id="student-meta">{{ { 'current_day': current_day, 'current_lunch': current_lunch, 'favorites': favorites } | tojson }}</script>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/student.js') }}"></script>
+{% endblock %}
