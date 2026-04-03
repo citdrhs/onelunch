@@ -4,6 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Onelunch{% endblock %}</title>
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('theme');
+        var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = (saved === 'dark' || saved === 'light') ? saved : (systemDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   {% block head %}{% endblock %}
 </head>
@@ -11,6 +23,7 @@
   <header class="site-header" id="site-header">
     <a href="{{ url_for('index') }}" class="logo">Onelunch</a>
     <button type="button" class="nav-toggle" aria-label="Toggle menu" id="nav-toggle"></button>
+    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Switch theme">🌙</button>
     <nav class="site-nav" id="site-nav">
       <a href="{{ url_for('index') }}">Home</a>
       {% if session.get('user_id') %}
@@ -40,11 +53,6 @@
     </nav>
   </header>
   <main class="main-content">
-    {% if demo_mode %}
-    <div class="demo-banner" role="status">
-      Demo mode — no database connected. Use this to explore the UI. Data is not saved.
-    </div>
-    {% endif %}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
       <div class="flash-messages">
@@ -57,7 +65,7 @@
     {% block content %}{% endblock %}
   </main>
   <footer class="site-footer">
-    <p>Onelunch — Know where to go. Find your spot.{% if demo_mode %} <span class="demo-tag">(Demo)</span>{% endif %}</p>
+    <p>Onelunch — Know where to go. Find your spot.</p>
   </footer>
   {% block scripts %}{% endblock %}
   <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
@@ -67,6 +75,24 @@
     var toggle = document.getElementById('nav-toggle');
     var nav = document.getElementById('site-nav');
     var header = document.getElementById('site-header');
+    var themeToggle = document.getElementById('theme-toggle');
+    var root = document.documentElement;
+
+    function applyTheme(mode) {
+      var next = mode === 'dark' ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      if (themeToggle) {
+        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+        themeToggle.setAttribute('aria-label', next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+        themeToggle.setAttribute('title', next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+      }
+    }
+
+    try {
+      applyTheme(root.getAttribute('data-theme') || 'light');
+    } catch (e) {
+      applyTheme('light');
+    }
     if (toggle && nav) {
       toggle.addEventListener('click', function() {
         nav.classList.toggle('open');
@@ -76,6 +102,14 @@
     if (header) {
       window.addEventListener('scroll', function() {
         header.classList.toggle('scrolled', window.scrollY > 8);
+      });
+    }
+    if (themeToggle) {
+      themeToggle.addEventListener('click', function() {
+        var current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        var next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
       });
     }
   })();

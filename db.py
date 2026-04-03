@@ -1,11 +1,10 @@
 """
 PostgreSQL connection and schema. Uses psycopg (v3) or psycopg2.
-Falls back to demo mode only if no driver is available.
+If no driver is installed, uses an in-memory mock so the app can import.
 """
 import os
 import pathlib
 
-# Prefer psycopg (v3) — has Windows binary wheels; else use psycopg2
 _connector = None
 try:
     import psycopg
@@ -17,31 +16,51 @@ except ImportError:
     except ImportError:
         pass
 
-DEMO_MODE = _connector is None or os.environ.get("DEMO_MODE", "").strip() == "1"
+# Only when Postgres driver is missing — not a user-facing "demo mode".
+NO_DATABASE_DRIVER = _connector is None
 
-if not DEMO_MODE:
+if not NO_DATABASE_DRIVER:
     from config import DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
+
+_CONNECT_TIMEOUT = int(os.environ.get("DB_CONNECT_TIMEOUT", "5"))
 
 
 class _MockCursor:
-    def __enter__(self): return self
-    def __exit__(self, *a): pass
-    def execute(self, *a, **k): pass
-    def fetchone(self): return None
-    def fetchall(self): return []
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        pass
+
+    def execute(self, *a, **k):
+        pass
+
+    def fetchone(self):
+        return None
+
+    def fetchall(self):
+        return []
 
 
 class _MockConn:
-    def __enter__(self): return self
-    def __exit__(self, *a): pass
-    def cursor(self): return _MockCursor()
-    def commit(self): pass
-    def close(self): pass
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        pass
+
+    def cursor(self):
+        return _MockCursor()
+
+    def commit(self):
+        pass
+
+    def close(self):
+        pass
 
 
 def get_connection():
-    """Return a new connection to the database, or mock in demo mode."""
-    if DEMO_MODE:
+    if NO_DATABASE_DRIVER:
         return _MockConn()
     if _connector == "psycopg3":
         return psycopg.connect(
@@ -50,20 +69,21 @@ def get_connection():
             user=DB_USER,
             password=DB_PASSWORD,
             port=DB_PORT,
+            connect_timeout=_CONNECT_TIMEOUT,
         )
-    # psycopg2
     return psycopg.connect(
         host=DB_HOST,
         database=DB_NAME,
         user=DB_USER,
         password=DB_PASSWORD,
         port=DB_PORT,
+        connect_timeout=_CONNECT_TIMEOUT,
     )
 
 
 def init_db():
     """Create or update schema in the database. Safe to run multiple times."""
-    if DEMO_MODE:
+    if NO_DATABASE_DRIVER:
         return
     schema_path = pathlib.Path(__file__).parent / "schema.sql"
     if not schema_path.exists():
@@ -79,7 +99,7 @@ def init_db():
 
 
 def test_connection():
-    if DEMO_MODE:
+    if NO_DATABASE_DRIVER:
         return True
     try:
         conn = get_connection()

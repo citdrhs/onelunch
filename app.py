@@ -16,25 +16,22 @@ from flask import (
     request,
     redirect,
     url_for,
-    flash,
+    flash, 
     jsonify,
     session,
     abort,
+    send_from_directory,
 )
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from db import get_connection, init_db, DEMO_MODE
+from db import get_connection, init_db
 import config
 
 
 app = Flask(__name__)
 
 
-@app.context_processor
-def inject_demo_mode():
-    """Make demo mode available in all templates."""
-    return {"demo_mode": DEMO_MODE}
 app.config.from_object(config)
 app.secret_key = getattr(config, "SECRET_KEY", os.environ.get("SECRET_KEY", "dev-secret"))
 
@@ -692,6 +689,11 @@ def map():
     return render_template("map.html")
 
 
+@app.route("/floorplan.png")
+def floorplan_image():
+    return send_from_directory(app.root_path, "floorplan.png")
+
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -1273,6 +1275,22 @@ def admin_department_default():
 
 
 if __name__ == "__main__":
-    # Onelunch runs on 5000
-    print(" * Onelunch at http://127.0.0.1:5000")
-    app.run(debug=True, port=5000)
+    import threading
+    import time
+    import webbrowser
+
+    _local_url = "http://127.0.0.1:5000/"
+
+    def _open_browser():
+        time.sleep(1.0)
+        webbrowser.open(_local_url)
+
+    threading.Thread(target=_open_browser, daemon=True).start()
+    print(f" * Onelunch — opening {_local_url} in your browser")
+    app.run(
+        debug=True,
+        host="127.0.0.1",
+        port=5000,
+        threaded=True,
+        use_reloader=False,
+    )

@@ -9,95 +9,466 @@
 
   <div class="map-container card reveal">
     <div class="floor-tabs">
-      <button class="floor-tab active" onclick="showFloor('first')">First Floor</button>
-      <button class="floor-tab" onclick="showFloor('second')">Second Floor</button>
+      <button class="floor-tab" onclick="showFloor('first', this)">First Floor</button>
+      <button class="floor-tab active" onclick="showFloor('second', this)">Second Floor</button>
     </div>
 
-    <div id="first-floor" class="floor-map active">
+    <div id="first-floor" class="floor-map">
       <h3>First Floor</h3>
-      <div class="map-placeholder">
-        <div class="map-note">
-          <p><strong>Coming Soon:</strong> Interactive floor plan with room locations</p>
-          <p>This map will show:</p>
-          <ul>
-            <li>Classroom locations and room numbers</li>
-            <li>Office locations</li>
-            <li>Common areas and facilities</li>
-            <li>Navigation between floors</li>
-          </ul>
-        </div>
-        <div class="map-canvas">
-          <!-- Placeholder for SVG or image map -->
-          <svg width="800" height="600" viewBox="0 0 800 600" style="border: 1px solid var(--color-border); background: var(--color-surface);">
-            <text x="400" y="300" text-anchor="middle" fill="var(--color-text-muted)" font-size="24">First Floor Map</text>
-            <text x="400" y="330" text-anchor="middle" fill="var(--color-text-muted)" font-size="16">Coming Soon</text>
-          </svg>
-        </div>
+      <div class="map-canvas floor1-canvas">
+        <svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet" class="floor1-svg" aria-label="First floor room map">
+          <path
+            id="building-border-ring"
+            fill-rule="evenodd"
+            d="
+              M 495.3,597.0 L 831.7,596.0 L 831.7,614.1 L 844.7,614.1 L 844.6,646.2
+              L 869.7,646.1 L 869.7,602.0 L 849.7,602.0 L 849.8,579.0 L 801.7,579.1
+              L 801.9,453.5 L 867.0,453.4 L 867.0,430.3 L 802.0,430.3 L 802.0,312.7
+              L 850.0,312.7 L 849.9,281.6 L 856.0,281.6 L 855.9,247.4 L 827.9,247.4
+              L 827.9,255.4 L 828.0,287.6 L 819.9,287.5 L 820.0,295.6 L 569.6,294.8
+              L 569.0,194.3 L 547.9,193.2 L 539.1,253.3 L 480.3,253.0 L 480.1,35.0 L 449.9,35.0
+              L 449.9,18.0 L 399.6,13.0 L 399.6,23.0 L 379.5,23.1 L 379.6,3.1 L 309.2,3.2
+              L 309.2,16.2 L 289.1,16.2 L 289.1,8.2 L 248.0,10.3 L 247.9,28.3 L 216.8,26.4
+              L 216.8,33.4 L 163.7,30.5 L 162.6,42.5 L 201.8,42.4 L 199.6,85.5 L 194.5,138.7
+              L 193.3,186.9 L 170.3,188.9 L 233.3,225.9 L 233.2,274.2 L 213.1,274.3
+              L 213.0,329.7 L 233.0,329.7 L 228.0,395.2 L 244.0,395.2 L 243.1,445.6
+              L 233.1,445.6 L 233.2,489.9 L 233.2,493.9 L 243.3,494.0 L 242.4,541.2
+              L 241.6,585.4 L 168.4,587.2 L 168.5,611.3 L 148.4,611.2 L 148.5,661.4
+              L 178.6,661.4 L 178.6,637.4 L 505.3,638.0 Z
+
+              M 464,310 L 739,310 L 739,341 L 785,341 L 785,432 L 739,432 L 739,451 L 788,451
+              L 788,545 L 741,545 L 741,582 L 488,582 L 443,362 L 538,362 L 538,357 L 464,357 Z
+            "
+          />
+
+          <g id="room101" class="room-group"><polygon class="room" points="165,12 249,12 249,30 218,28 218,35 165,32" /><text class="room-label" x="207.0" y="23.5">1</text></g>
+          <g id="room102" class="room-group"><polygon class="room" points="164,44 161,87 201,87 203,44" /><text class="room-label" x="182.0" y="65.5">2</text></g>
+          <g id="room103" class="room-group"><polygon class="room" points="153,87 201,87 196,140 165,140" /><text class="room-label" x="177.0" y="113.5">3</text></g>
+          <g id="room104" class="room-group"><polygon class="room" points="196,140 165,140 172,190 195,188" /><text class="room-label" x="180.5" y="165.0">4</text></g>
+          <g id="room105" class="room-group"><polygon class="room" points="547,195 555,152 597,153 597,197" /><text class="room-label" x="573.0" y="174.5">5</text></g>
+          <g id="room106" class="room-group"><polygon class="room" points="568,196 568,215 597,215 597,197" /><text class="room-label" x="582.5" y="205.5">6</text></g>
+          <g id="room107" class="room-group"><polygon class="room" points="568,215 568,256 597,256 597,215" /><text class="room-label" x="582.5" y="235.5">7</text></g>
+          <g id="room108" class="room-group"><polygon class="room" points="568,256 610,256 610,296 568,296" /><text class="room-label" x="589.0" y="276.0">8</text></g>
+          <g id="room109" class="room-group"><polygon class="room" points="610,256 642,256 642,296 610,296" /><text class="room-label" x="626.0" y="276.0">9</text></g>
+          <g id="room110" class="room-group"><polygon class="room" points="642,256 675,256 675,296 642,296" /><text class="room-label" x="658.5" y="276.0">10</text></g>
+          <g id="room111" class="room-group"><polygon class="room" points="675,256 692,256 693,250 703,250 704,296 675,296" /><text class="room-label" x="689.5" y="273.0">11</text></g>
+          <g id="room112" class="room-group"><polygon class="room" points="703,250 715,250 716,256 736,256 736,296 704,296" /><text class="room-label" x="719.5" y="274.0">12</text></g>
+          <g id="room113" class="room-group"><polygon class="room" points="736,256 766,256 766,296 736,296" /><text class="room-label" x="751.0" y="277.0">13</text></g>
+          <g id="room114" class="room-group"><polygon class="room" points="766,256 798,256 798,296 766,296" /><text class="room-label" x="782.0" y="277.0">14</text></g>
+          <g id="room115" class="room-group"><polygon class="room" points="798,256 826,256  826,288 818,288 818,296 798,296" /><text class="room-label" x="812.0" y="277.0">15</text></g>
+          <g id="room116" class="room-group"><polygon class="room" points="497,364 538,364 538,403 496,403" /><text class="room-label" x="517.0" y="383.5">16</text></g>
+          <g id="room117" class="room-group"><polygon class="room" points="466,312 512,312 512,355 466,355" /><text class="room-label" x="489.0" y="333.5">17</text></g>
+          <g id="room118" class="room-group"><polygon class="room" points="512,312 577,312 577,355 512,355" /><text class="room-label" x="544.5" y="333.5">18</text></g>
+          <g id="room119" class="room-group"><polygon class="room" points="577,312 643,312 643,355 577,355" /><text class="room-label" x="610.0" y="333.5">19</text></g>
+          <g id="room120" class="room-group"><polygon class="room" points="643,312 678,312 678,355 643,355" /><text class="room-label" x="660.5" y="333.5">20</text></g>
+          <g id="room121" class="room-group"><polygon class="room" points="678,312 737,312 737,355 717,355 717,364 693,364 693,355 678,355" /><text class="room-label" x="707.5" y="338.0">21</text></g>
+          <g id="room122" class="room-group"><polygon class="room" points="800,399 848,399 848,430 800,430" /><text class="room-label" x="824.0" y="414.5">22</text></g>
+          <g id="room123" class="room-group"><polygon class="room" points="800,370 848,370 848,399 800,399" /><text class="room-label" x="824.0" y="384.5">23</text></g>
+          <g id="room124" class="room-group"><polygon class="room" points="800,343 848,343 848,370 800,370" /><text class="room-label" x="824.0" y="356.5">24</text></g>
+          <g id="room125" class="room-group"><polygon class="room" points="800,313 848,313 848,343 800,343" /><text class="room-label" x="824.0" y="328.0">25</text></g>
+          <g id="room126" class="room-group"><polygon class="room" points="739,343 783,343 783,373 739,373" /><text class="room-label" x="761.0" y="358.0">26</text></g>
+          <g id="room127" class="room-group"><polygon class="room" points="739,373 783,373 783,403 739,403" /><text class="room-label" x="761.0" y="388.0">27</text></g>
+          <g id="room128" class="room-group"><polygon class="room" points="739,403 783,403 783,430 739,430" /><text class="room-label" x="761.0" y="416.5">28</text></g>
+          <g id="room129" class="room-group"><polygon class="room" points="739,453 786,453 786,483 739,483" /><text class="room-label" x="762.5" y="468.0">29</text></g>
+          <g id="room130" class="room-group"><polygon class="room" points="739,483 786,483 786,513 739,513" /><text class="room-label" x="762.5" y="498.0">30</text></g>
+          <g id="room131" class="room-group"><polygon class="room" points="739,513 786,513 786,543 739,543" /><text class="room-label" x="762.5" y="528.0">31</text></g>
+          <g id="room132" class="room-group"><polygon class="room" points="800,453 848,453 848,483 800,483" /><text class="room-label" x="824.0" y="468.0">32</text></g>
+          <g id="room133" class="room-group"><polygon class="room" points="800,483 848,483 848,546 800,546" /><text class="room-label" x="824.0" y="514.5">33</text></g>
+          <g id="room134" class="room-group"><polygon class="room" points="800,546 848,546 848,578 800,578" /><text class="room-label" x="824.0" y="562.0">34</text></g>
+          <g id="room135" class="room-group"><polygon class="room" points="445,364 484,364 484,403 453,403" /><text class="room-label" x="464.5" y="383.5">35</text></g>
+          <g id="room136" class="room-group"><polygon class="room" points="481,536 554,536 554,580 493,580 490,580" /><text class="room-label" x="520.0" y="558.0">36</text></g>
+          <g id="room137" class="room-group"><polygon class="room" points="554,536 610,536 610,580 554,580" /><text class="room-label" x="582.0" y="558.0">37</text></g>
+          <g id="room138" class="room-group"><polygon class="room" points="610,536 675,536 675,580 610,580" /><text class="room-label" x="642.5" y="558.0">38</text></g>
+          <g id="room139" class="room-group"><polygon class="room" points="675,536 692,536 692,525 715,525 715,536 739,536 739,580 675,580" /><text class="room-label" x="707.0" y="552.5">39</text></g>
+          <g id="room140" class="room-group"><polygon class="room" points="473,497 504,497 504,536 481,536" /><text class="room-label" x="489.5" y="516.5">40</text></g>
+          <g id="room141" class="room-group"><polygon class="room" points="504,497 537,497 537,536 504,536" /><text class="room-label" x="520.5" y="516.5">41</text></g>
+          <g id="room142" class="room-group"><path class="room" d="M 453,403 L 538,403 A 47 47 0 0 1 537,497 L 473,497 Z" /><text class="room-label" x="495.5" y="450.0">42</text></g>
+          <g id="room143" class="room-group"><polygon class="room" points="260,56 435,62 434,192 255,189" /><text class="room-label" x="345.0" y="124.0">43</text></g>
+          <g id="room144" class="room-group"><polygon class="room" points="265,402 321,390 328,413 354,413 361,390 417,402 417,582 262,582" /><text class="room-label" x="339.5" y="486.0">44</text></g>
+          <g id="room145" class="room-group"><polygon class="room" points="230,395 246,395 245,445 163,443 166,427" /><text class="room-label" x="204.5" y="428.0">45</text></g>
+          <g id="room146" class="room-group"><polygon class="room" points="163,443 235,445 235,489 153,489" /><text class="room-label" x="194.0" y="466.0">46</text></g>
+          <g id="room147" class="room-group"><polygon class="room" points="153,489 235,489 235,493 245,493 244,540 170,540 170,570 150,570 150,540 142,540" /><text class="room-label" x="193.5" y="514.5">47</text></g>
+          <g id="room148" class="room-group"><polygon class="room" points="244,540 170,540 170,586 243,584" /><text class="room-label" x="207.0" y="563.0">48</text></g>
+          <g id="room149" class="room-group"><polygon class="room" points="675,595 739,595 739,635 715,635 715,647 688,647 688,635 675,635" /><text class="room-label" x="707.0" y="619.0">49</text></g>
+          <g id="room150" class="room-group"><polygon class="room" points="739,595 776,595 776,635 739,635" /><text class="room-label" x="757.5" y="615.0">50</text></g>
+          <g id="room151" class="room-group"><polygon class="room" points="776,595 807,595 807,635 776,635" /><text class="room-label" x="791.5" y="615.0">51</text></g>
+          <g id="room152" class="room-group"><polygon class="room" points="807,595 830,595 830,613 843,613 843,635 807,635" /><text class="room-label" x="825.0" y="615.0">52</text></g>
+          <g id="room158" class="room-group"><polygon class="room" points="495,595 530,595 530,631 580,631 580,681 520,681" /><text class="room-label" x="542.5" y="646.0">58</text></g>
+          <g id="room159" class="room-group"><polygon class="room" points="530,595 563,595 563,635 530,635" /><text class="room-label" x="546.5" y="615.0">59</text></g>
+          <g id="room160" class="room-group"><polygon class="room" points="563,595 617,595 617,635 563,635" /><text class="room-label" x="590.0" y="615.0">60</text></g>
+          <g id="room161" class="room-group"><polygon class="room" points="632,595 675,595 675,635 632,635" /><text class="room-label" x="653.5" y="615.0">61</text></g>
+        </svg>
       </div>
     </div>
 
-    <div id="second-floor" class="floor-map">
+    <div id="second-floor" class="floor-map active">
       <h3>Second Floor</h3>
-      <div class="map-placeholder">
-        <div class="map-note">
-          <p><strong>Coming Soon:</strong> Interactive floor plan with room locations</p>
-          <p>This map will show:</p>
-          <ul>
-            <li>Classroom locations and room numbers</li>
-            <li>Office locations</li>
-            <li>Common areas and facilities</li>
-            <li>Navigation between floors</li>
-          </ul>
-        </div>
-        <div class="map-canvas">
-          <!-- Placeholder for SVG or image map -->
-          <svg width="800" height="600" viewBox="0 0 800 600" style="border: 1px solid var(--color-border); background: var(--color-surface);">
-            <text x="400" y="300" text-anchor="middle" fill="var(--color-text-muted)" font-size="24">Second Floor Map</text>
-            <text x="400" y="330" text-anchor="middle" fill="var(--color-text-muted)" font-size="16">Coming Soon</text>
-          </svg>
-        </div>
+      <div class="map-canvas floor1-canvas">
+        <svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet" class="floor2-svg" aria-label="Second floor map">
+          <image href="{{ url_for('static', filename='2ndmap.png') }}" x="0" y="0" width="1000" height="700"></image>
+          <g id="s2room01" class="floor2-slot"><polygon class="floor2-poly" points="413,91 447,91 447,141 413,141" /><text class="floor2-num" x="430" y="116">1</text></g>
+          <g id="s2room02" class="floor2-slot"><polygon class="floor2-poly" points="447,91 482,91 482,141 447,141" /><text class="floor2-num" x="464.5" y="116">2</text></g>
+          <g id="s2room03" class="floor2-slot"><polygon class="floor2-poly" points="482,91 540,91 540,141 482,141" /><text class="floor2-num" x="511" y="116">3</text></g>
+          <g id="s2room04" class="floor2-slot"><polygon class="floor2-poly" points="552,91 614,91 614,141 552,141" /><text class="floor2-num" x="583" y="116">4</text></g>
+          <g id="s2room05" class="floor2-slot"><polygon class="floor2-poly" points="613,141 613,91 635,91 635,81 651,81 651,91 651,141" /><text class="floor2-num" x="632" y="115">5</text></g>
+          <g id="s2room06" class="floor2-slot"><polygon class="floor2-poly" points="688,91 688,141 651,141 651,91 651,81 664,81 664,91" /><text class="floor2-num" x="669.5" y="115">6</text></g>
+          <g id="s2room07" class="floor2-slot"><polygon class="floor2-poly" points="688,91 723,91 723,141 688,141" /><text class="floor2-num" x="705.5" y="116">7</text></g>
+          <g id="s2room08" class="floor2-slot"><polygon class="floor2-poly" points="723,91 758,91 758,141 723,141" /><text class="floor2-num" x="740.5" y="116">8</text></g>
+          <g id="s2room09" class="floor2-slot"><polygon class="floor2-poly" points="758,91 793,91 793,141 758,141" /><text class="floor2-num" x="775.5" y="116">9</text></g>
+          <!-- Row below top strip: +5px height vs rooms above; top y=159 (18px under y=141); align x with room 1 (413) -->
+          <g id="s2room10" class="floor2-slot"><polygon class="floor2-poly" points="413,159 459,159 459,214 413,214" /><text class="floor2-num" x="436" y="186.5">10</text></g>
+          <g id="s2room11" class="floor2-slot"><polygon class="floor2-poly" points="459,159 517,159 517,214 459,214" /><text class="floor2-num" x="488" y="186.5">11</text></g>
+          <g id="s2room12" class="floor2-slot"><polygon class="floor2-poly" points="517,159 557,159 557,214 517,214" /><text class="floor2-num" x="537" y="186.5">12</text></g>
+          <g id="s2room13" class="floor2-slot"><polygon class="floor2-poly" points="557,159 619,159 619,214 557,214" /><text class="floor2-num" x="588" y="186.5">13</text></g>
+          <!-- Vertical stack 14–19: col 699–749 -->
+          <g id="s2room14" class="floor2-slot"><polygon class="floor2-poly" points="699,196 750,196 750,230 699,230" /><text class="floor2-num" x="724.5" y="213">14</text></g>
+          <g id="s2room15" class="floor2-slot"><polygon class="floor2-poly" points="699,230 750,230 750,264 699,264" /><text class="floor2-num" x="724.5" y="247">15</text></g>
+          <g id="s2room16" class="floor2-slot"><polygon class="floor2-poly" points="699,264 750,264 750,319 699,319" /><text class="floor2-num" x="724.5" y="291.5">16</text></g>
+          <g id="s2room17" class="floor2-slot"><polygon class="floor2-poly" points="699,319 750,319 750,374 699,374" /><text class="floor2-num" x="724.5" y="346.5">17</text></g>
+          <g id="s2room18" class="floor2-slot"><polygon class="floor2-poly" points="699,374 750,374 750,408 699,408" /><text class="floor2-num" x="724.5" y="391">18</text></g>
+          <g id="s2room19" class="floor2-slot"><polygon class="floor2-poly" points="699,408 750,408 750,448 699,448" /><text class="floor2-num" x="724.5" y="428">19</text></g>
+          <!-- 8 rooms left of 19: equal width 37px; shared walls x=662,625,588,551,514,477,440; 20/21 divots stay inside each cell -->
+          <g id="s2room20" class="floor2-slot"><polygon class="floor2-poly" points="699,433 699,485 662,485 662,423 677,423 677,433" /><text class="floor2-num" x="680.5" y="456">20</text></g>
+          <g id="s2room21" class="floor2-slot"><polygon class="floor2-poly" points="625,485 625,433 644,433 644,423 662,423 662,433 662,485" /><text class="floor2-num" x="643.5" y="456">21</text></g>
+          <g id="s2room22" class="floor2-slot"><polygon class="floor2-poly" points="588,433 625,433 625,485 588,485" /><text class="floor2-num" x="606.5" y="459">22</text></g>
+          <g id="s2room23" class="floor2-slot"><polygon class="floor2-poly" points="551,433 588,433 588,485 551,485" /><text class="floor2-num" x="569.5" y="459">23</text></g>
+          <g id="s2room24" class="floor2-slot"><polygon class="floor2-poly" points="514,433 551,433 551,485 514,485" /><text class="floor2-num" x="532.5" y="459">24</text></g>
+          <g id="s2room25" class="floor2-slot"><polygon class="floor2-poly" points="477,433 514,433 514,485 477,485" /><text class="floor2-num" x="495.5" y="459">25</text></g>
+          <g id="s2room26" class="floor2-slot"><polygon class="floor2-poly" points="440,433 477,433 477,485 440,485" /><text class="floor2-num" x="458.5" y="459">26</text></g>
+          <g id="s2room27" class="floor2-slot"><polygon class="floor2-poly" points="403,433 440,433 440,485 403,485" /><text class="floor2-num" x="421.5" y="459">27</text></g>
+        </svg>
       </div>
     </div>
   </div>
 </section>
 
 <style>
+/* ============================================
+   FLOOR PLAN - REFINED ARCHITECTURAL STYLE
+   Light theme, blueprint-inspired, professional
+   ============================================ */
+
+:root {
+  --floor-bg: #f0ece4;
+  --corridor-fill: #e8ddd0;
+  --corridor-stroke: #c4b8a8;
+  --room-bg: #faf8f5;
+  --room-bg-hover: #ffffff;
+  --room-stroke: #9e9385;
+  --room-stroke-hover: #4a7c6f;
+  --room-shadow: rgba(80, 70, 60, 0.12);
+  --room-shadow-hover: rgba(74, 124, 111, 0.22);
+  --label-color: #3d3530;
+  --label-hover: #2a5248;
+  --accent: #4a7c6f;
+  --accent-light: #d4e8e3;
+  --large-room-bg: #edf3f1;
+  --large-room-stroke: #6aab9c;
+  --grid-line: rgba(180, 170, 158, 0.25);
+  --font-label: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* -- Page / Container -- */
+body, html {
+  margin: 0;
+  padding: 0;
+  background: var(--floor-bg);
+  font-family: var(--font-label);
+  color: var(--label-color);
+  -webkit-font-smoothing: antialiased;
+}
+
+.map-container,
+#map,
+[class*="map-wrap"],
+[class*="floor-plan"] {
+  background:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(135deg, #f5f0e8 0%, #ede8df 100%);
+  background-size: 40px 40px, 40px 40px, 100% 100%;
+  border-radius: 12px;
+  box-shadow:
+    0 1px 3px rgba(0,0,0,0.06),
+    0 8px 32px rgba(80,70,60,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
 .map-section {
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--space-6);
-}
-
-.map-container {
-  padding: var(--space-6);
+  padding: 24px;
 }
 
 .floor-tabs {
-  display: flex;
-  gap: var(--space-2);
-  margin-bottom: var(--space-6);
-  border-bottom: 1px solid var(--color-border);
+  display: inline-flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(196, 184, 168, 0.7);
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 .floor-tab {
-  padding: var(--space-3) var(--space-5);
-  border: none;
-  background: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  transition: all var(--duration-fast);
+  border: 1px solid transparent;
+  background: transparent;
+  color: #5a5148;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-family: var(--font-label);
+  font-size: 13px;
   font-weight: 600;
-}
-
-.floor-tab.active {
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
+  cursor: pointer;
+  transition: all var(--transition);
 }
 
 .floor-tab:hover:not(.active) {
-  background: var(--color-primary-muted);
-  color: var(--color-primary);
+  background: rgba(74,124,111,0.12);
+  color: #2f5b51;
+}
+
+.floor-tab.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(74,124,111,0.25);
+}
+
+/* Subtle watermark compass rose top-right */
+.map-container::before {
+  content: "⊕";
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  font-size: 28px;
+  color: rgba(158, 147, 133, 0.35);
+  pointer-events: none;
+  font-family: serif;
+  letter-spacing: -1px;
+}
+
+/* -- Corridor / Building Shell -- */
+.corridor,
+.building-shell,
+[class*="corridor"],
+svg path[fill*="salmon"],
+svg path[fill*="pink"],
+svg rect.corridor {
+  fill: var(--corridor-fill) !important;
+  stroke: var(--corridor-stroke) !important;
+  stroke-width: 1.5px !important;
+  filter: drop-shadow(0 2px 6px rgba(80,70,60,0.08));
+}
+
+#building-border-ring {
+  fill: #d8d2c8 !important;
+  stroke: var(--room-stroke) !important;
+  stroke-width: 1px !important;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* -- Individual Rooms -- */
+.room,
+[class*="room-box"],
+[data-room],
+svg g.room rect,
+svg rect.room {
+  fill: var(--room-bg) !important;
+  stroke: var(--room-stroke) !important;
+  stroke-width: 1px !important;
+  rx: var(--radius-sm);
+  transition: fill var(--transition), stroke var(--transition),
+              filter var(--transition), transform var(--transition);
+  cursor: pointer;
+  filter: drop-shadow(0 1px 3px var(--room-shadow));
+}
+
+.room:hover,
+[class*="room-box"]:hover,
+[data-room]:hover,
+svg g.room:hover rect {
+  fill: var(--room-bg-hover) !important;
+  stroke: var(--room-stroke-hover) !important;
+  stroke-width: 1.5px !important;
+  filter: drop-shadow(0 3px 10px var(--room-shadow-hover));
+  transform: translateY(-1px);
+}
+
+/* -- Large / Special Rooms (43, 44, 42) -- */
+.room-large,
+[data-room="43"],
+[data-room="44"],
+[data-room="42"],
+svg g[id*="43"] rect,
+svg g[id*="44"] rect,
+svg g[id*="42"] rect {
+  fill: var(--large-room-bg) !important;
+  stroke: var(--large-room-stroke) !important;
+  stroke-width: 1.5px !important;
+  stroke-dasharray: none;
+}
+
+/* -- Room Labels -- */
+.room-label,
+[class*="room-label"],
+svg text.room-label,
+svg g.room text,
+text {
+  font-family: var(--font-label) !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  fill: var(--label-color) !important;
+  letter-spacing: 0.02em;
+  user-select: none;
+  pointer-events: none;
+  transition: fill var(--transition);
+}
+
+svg text.room-label {
+  text-anchor: middle !important;
+  dominant-baseline: middle !important;
+  alignment-baseline: middle !important;
+}
+
+.room:hover text,
+svg g.room:hover text {
+  fill: var(--label-hover) !important;
+  font-weight: 600 !important;
+}
+
+/* Second floor: plain draft overlays (polygons; separate from first-floor room styling) */
+#second-floor .floor2-poly {
+  fill: rgba(200, 45, 45, 0.38);
+  stroke: rgba(90, 18, 18, 0.92);
+  stroke-width: 1.25px;
+  stroke-linejoin: bevel;
+  filter: none;
+  cursor: default;
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+#second-floor .floor2-slot:hover .floor2-poly {
+  fill: rgba(210, 40, 40, 0.48);
+  stroke: rgba(55, 10, 10, 0.98);
+}
+
+#second-floor svg text.floor2-num {
+  font-family: var(--font-label) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  fill: rgba(75, 28, 28, 0.88) !important;
+  letter-spacing: 0 !important;
+  pointer-events: none;
+  user-select: none;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+/* Large room labels */
+svg g[id*="43"] text,
+svg g[id*="44"] text,
+svg g[id*="42"] text {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.06em !important;
+  fill: #3a5c54 !important;
+}
+
+/* -- Legend / UI Controls (if present) -- */
+.legend,
+.map-legend {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(196, 184, 168, 0.5);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-family: var(--font-label);
+  font-size: 12px;
+  color: var(--label-color);
+  box-shadow: 0 2px 12px rgba(80,70,60,0.08);
+}
+
+.legend-title {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+
+/* -- Tooltip (if present) -- */
+.room-tooltip,
+[class*="tooltip"] {
+  background: #ffffff;
+  border: 1px solid var(--corridor-stroke);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-family: var(--font-label);
+  font-size: 12px;
+  color: var(--label-color);
+  box-shadow: 0 4px 20px rgba(80,70,60,0.14);
+  pointer-events: none;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+/* -- Selected / Active Room State -- */
+.room.selected,
+[data-room].selected,
+svg g.room.selected rect {
+  fill: var(--accent-light) !important;
+  stroke: var(--accent) !important;
+  stroke-width: 2px !important;
+  filter: drop-shadow(0 0 0 3px rgba(74,124,111,0.18))
+          drop-shadow(0 3px 12px rgba(74,124,111,0.25));
+}
+
+/* -- Scroll / Zoom container -- */
+.map-scroll,
+[class*="map-scroll"],
+[class*="zoom-container"] {
+  overflow: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--corridor-stroke) transparent;
+}
+
+.map-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.map-scroll::-webkit-scrollbar-thumb {
+  background: var(--corridor-stroke);
+  border-radius: 99px;
+}
+
+/* -- Page title if present -- */
+h1, .map-title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 28px;
+  color: var(--label-color);
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+
+.map-subtitle {
+  font-family: var(--font-label);
+  font-size: 13px;
+  font-weight: 300;
+  color: #8a7d72;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
 }
 
 .floor-map {
@@ -107,53 +478,10 @@
 .floor-map.active {
   display: block;
 }
-
-.map-placeholder {
-  display: flex;
-  gap: var(--space-6);
-  align-items: flex-start;
-}
-
-.map-note {
-  flex: 1;
-  padding: var(--space-4);
-  background: var(--color-surface-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-}
-
-.map-note ul {
-  margin: var(--space-3) 0 0 var(--space-4);
-}
-
-.map-note li {
-  margin-bottom: var(--space-2);
-}
-
-.map-canvas {
-  flex: 2;
-  display: flex;
-  justify-content: center;
-}
-
-.map-canvas svg {
-  max-width: 100%;
-  height: auto;
-}
-
-@media (max-width: 768px) {
-  .map-placeholder {
-    flex-direction: column;
-  }
-
-  .map-canvas {
-    order: -1;
-  }
-}
 </style>
 
 <script>
-function showFloor(floor) {
+function showFloor(floor, buttonEl) {
   // Hide all floors
   document.querySelectorAll('.floor-map').forEach(map => {
     map.classList.remove('active');
@@ -164,7 +492,8 @@ function showFloor(floor) {
 
   // Show selected floor
   document.getElementById(floor + '-floor').classList.add('active');
-  event.target.classList.add('active');
+  if (buttonEl) buttonEl.classList.add('active');
 }
 </script>
 {% endblock %}
+
