@@ -118,7 +118,7 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, var(--overlay), transparent);
   transition: left 0.5s;
 }
 .auth-page .primary-btn:hover::before {
@@ -209,8 +209,8 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
   gap: var(--space-4);
   padding: var(--space-4) var(--space-5);
   margin-bottom: var(--space-6);
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(6, 182, 212, 0.08) 100%);
-  border: 1px solid rgba(79, 70, 229, 0.15);
+  background: linear-gradient(135deg, var(--color-primary-muted) 0%, var(--color-accent-muted) 100%);
+  border: 1px solid var(--color-primary-light);
   border-radius: var(--radius-xl);
   font-size: var(--text-sm);
   font-weight: 500;
@@ -411,7 +411,7 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
   margin-top: var(--space-4);
   padding: var(--space-4);
   background: var(--color-warning-bg);
-  border: 1px solid rgba(217, 119, 6, 0.3);
+  border: 1px solid var(--color-warning);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
 }
@@ -631,17 +631,17 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
 
 .request-card.status-pending {
   border-left: 4px solid var(--color-warning);
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.05), transparent);
+  background: linear-gradient(135deg, var(--color-warning-bg), transparent);
 }
 
 .request-card.status-approved {
   border-left: 4px solid var(--color-success);
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), transparent);
+  background: linear-gradient(135deg, var(--color-success-bg), transparent);
 }
 
 .request-card.status-rejected {
   border-left: 4px solid var(--color-error);
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), transparent);
+  background: linear-gradient(135deg, var(--color-error-bg), transparent);
 }
 
 .request-header {
@@ -672,17 +672,17 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
 
 .status-badge.pending {
   background: var(--color-warning-muted);
-  color: #92400e;
+  color: var(--color-warning);
 }
 
 .status-badge.approved {
   background: var(--color-success-muted);
-  color: #166534;
+  color: var(--color-success);
 }
 
 .status-badge.rejected {
   background: var(--color-error-muted);
-  color: #7f1d1d;
+  color: var(--color-error);
 }
 
 .request-details {
@@ -727,17 +727,17 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
 
 .request-item.pending {
   border-left: 4px solid var(--color-warning);
-  background: rgba(249, 115, 22, 0.02);
+  background: var(--color-warning-bg);
 }
 
 .request-item.approved {
   border-left: 4px solid var(--color-success);
-  background: rgba(34, 197, 94, 0.02);
+  background: var(--color-success-bg);
 }
 
 .request-item.rejected {
   border-left: 4px solid var(--color-error);
-  background: rgba(239, 68, 68, 0.02);
+  background: var(--color-error-bg);
 }
 
 .request-info {
@@ -937,17 +937,17 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
 
 .timeline-item.pending {
   border-left-color: var(--color-warning);
-  background: rgba(249, 115, 22, 0.02);
+  background: var(--color-warning-bg);
 }
 
 .timeline-item.approved {
   border-left-color: var(--color-success);
-  background: rgba(34, 197, 94, 0.02);
+  background: var(--color-success-bg);
 }
 
 .timeline-item.rejected {
   border-left-color: var(--color-error);
-  background: rgba(239, 68, 68, 0.02);
+  background: var(--color-error-bg);
 }
 
 .timeline-marker {
@@ -1080,17 +1080,17 @@ body { min-height: 100vh; display: flex; flex-direction: column; }
 
 .badge.pending {
   background: var(--color-warning-muted);
-  color: #92400e;
+  color: var(--color-warning);
 }
 
 .badge.approved {
   background: var(--color-success-muted);
-  color: #166534;
+  color: var(--color-success);
 }
 
 .badge.rejected {
   background: var(--color-error-muted);
-  color: #7f1d1d;
+  color: var(--color-error);
 }
 
 /* Responsive */

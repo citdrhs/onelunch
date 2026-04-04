@@ -258,9 +258,10 @@ def build_rooms_for_display(include_availability_map=True):
     """Build rooms dict keyed by room number; each room has teacher_name, office_hours, etc.
     If include_availability_map, each room has availability_map: { day: 'A'|'B'|'N' }.
     """
-    conn = get_connection()
     out = {}
+    conn = None
     try:
+        conn = get_connection()
         with conn.cursor() as cur:
             cur.execute(
                 """SELECT r.id, r.number, r.office_hours, r.lunch_duty, r.club_meeting, u.name
@@ -287,8 +288,15 @@ def build_rooms_for_display(include_availability_map=True):
                 }
                 if avail_map is not None:
                     out[number]["availability_map"] = avail_map
+    except Exception as e:
+        try:
+            app.logger.warning("build_rooms_for_display failed: %s", e)
+        except Exception:
+            pass
+        return {}
     finally:
-        conn.close()
+        if conn is not None:
+            conn.close()
     return out
 
 
@@ -928,22 +936,31 @@ def teacher():
 @app.route("/student")
 def student():
     rooms = build_rooms_for_display(include_availability_map=True)
+    if not rooms:
+        flash("Database is temporarily unavailable. Showing limited data.", "warning")
     current_day, current_lunch = get_current_day_lunch()
     user = None
     if "user_id" in session:
-        user = get_user_by_id(session["user_id"])
+        try:
+            user = get_user_by_id(session["user_id"])
+        except Exception:
+            user = None
     favorites = []
     if user and user.get("role") == "student":
-        conn = get_connection()
+        conn = None
         try:
+            conn = get_connection()
             with conn.cursor() as cur:
                 cur.execute(
                     "SELECT room_id FROM student_favorites WHERE user_id = %s",
                     (user["id"],),
                 )
                 favorites = [r[0] for r in cur.fetchall()]
+        except Exception:
+            favorites = []
         finally:
-            conn.close()
+            if conn is not None:
+                conn.close()
     return render_template(
         "student.html",
         rooms=rooms,

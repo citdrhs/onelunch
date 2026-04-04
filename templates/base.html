@@ -5,15 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Onelunch{% endblock %}</title>
   <script>
-    (function () {
-      try {
-        var saved = localStorage.getItem('theme');
-        var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var theme = (saved === 'dark' || saved === 'light') ? saved : (systemDark ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-theme', theme);
-      } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'light');
-      }
+    (function() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
     })();
   </script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -23,7 +19,6 @@
   <header class="site-header" id="site-header">
     <a href="{{ url_for('index') }}" class="logo">Onelunch</a>
     <button type="button" class="nav-toggle" aria-label="Toggle menu" id="nav-toggle"></button>
-    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Switch theme">🌙</button>
     <nav class="site-nav" id="site-nav">
       <a href="{{ url_for('index') }}">Home</a>
       {% if session.get('user_id') %}
@@ -50,6 +45,9 @@
         <a href="{{ url_for('login') }}">Log in</a>
         <a href="{{ url_for('register') }}" class="cta">Sign up</a>
       {% endif %}
+      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+        <span class="theme-icon">🌙</span>
+      </button>
     </nav>
   </header>
   <main class="main-content">
@@ -75,23 +73,28 @@
     var toggle = document.getElementById('nav-toggle');
     var nav = document.getElementById('site-nav');
     var header = document.getElementById('site-header');
-    var themeToggle = document.getElementById('theme-toggle');
-    var root = document.documentElement;
+    window.updateToggleIcon = function(theme) {
+      var icon = document.querySelector('.theme-icon');
+      if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    };
 
-    function applyTheme(mode) {
-      var next = mode === 'dark' ? 'dark' : 'light';
-      root.setAttribute('data-theme', next);
-      if (themeToggle) {
-        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
-        themeToggle.setAttribute('aria-label', next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-        themeToggle.setAttribute('title', next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-      }
-    }
+    window.toggleTheme = function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      window.updateToggleIcon(next);
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var theme = document.documentElement.getAttribute('data-theme');
+      window.updateToggleIcon(theme);
+    });
 
     try {
-      applyTheme(root.getAttribute('data-theme') || 'light');
+      window.updateToggleIcon(document.documentElement.getAttribute('data-theme') || 'light');
     } catch (e) {
-      applyTheme('light');
+      // no-op
     }
     if (toggle && nav) {
       toggle.addEventListener('click', function() {
@@ -102,14 +105,6 @@
     if (header) {
       window.addEventListener('scroll', function() {
         header.classList.toggle('scrolled', window.scrollY > 8);
-      });
-    }
-    if (themeToggle) {
-      themeToggle.addEventListener('click', function() {
-        var current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-        var next = current === 'dark' ? 'light' : 'dark';
-        applyTheme(next);
-        try { localStorage.setItem('theme', next); } catch (e) {}
       });
     }
   })();
