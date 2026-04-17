@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelunch — School map</title>
+  <script>
+    (function() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    html, body.map-home { margin: 0; height: 100%; overflow: hidden; }
+    body.map-home {
+      display: flex;
+      flex-direction: column;
+      font-family: var(--font-body, system-ui, sans-serif);
+      background: var(--floor-bg, var(--color-background, #f4f1ec));
+    }
+    .map-home-wordmark {
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      color: var(--color-text, #222);
+      white-space: nowrap;
+      padding: 4px 0;
+      align-self: center;
+    }
+    .map-home-wordmark:hover { color: var(--accent, #4a7c6f); }
+    .map-home-club-link {
+      position: fixed;
+      bottom: 14px;
+      right: 14px;
+      z-index: 20001;
+      font-size: 13px;
+      color: var(--color-text-secondary, #555);
+      text-decoration: none;
+      background: var(--nav-bg, rgba(255,255,255,0.92));
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--color-border, #e0dcd4);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+    [data-theme="dark"] .map-home-club-link {
+      background: rgba(30,28,26,0.95);
+      color: var(--color-text, #e8e0d5);
+    }
+    .map-home-club-link:hover { color: var(--accent, #4a7c6f); text-decoration: underline; }
+    .map-home-topbar.map-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20000;
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px 14px;
+      padding: 10px 14px;
+      background: var(--nav-bg, rgba(255,255,255,0.92));
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--color-border, #e0dcd4);
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    }
+    [data-theme="dark"] .map-home-topbar {
+      background: rgba(30,28,26,0.95);
+    }
+    .map-filters {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      font-size: 0.85rem;
+    }
+    .map-filters .map-filter-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary, #666);
+      margin-right: 2px;
+      white-space: nowrap;
+    }
+    .map-filters label { font-size: 12px; color: var(--color-text-secondary, #666); margin: 0; }
+    .map-filters input[type="search"] {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--color-border, #ccc);
+      min-width: 140px;
+      font-size: 13px;
+    }
+    .map-filters .chip-row {
+      display: inline-flex;
+      flex-wrap: nowrap;
+      gap: 0.35rem;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .map-filters .chip {
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 999px;
+      border: 1px solid var(--color-border, #ccc);
+      background: transparent;
+      cursor: pointer;
+      color: var(--color-text, inherit);
+    }
+    .map-filters .chip.active {
+      background: var(--accent, #4a7c6f);
+      color: #fff;
+      border-color: var(--accent, #4a7c6f);
+    }
+    .map-home-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .map-portal-link {
+      font-size: 13px;
+      color: var(--color-text-secondary, #555);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .map-portal-link:hover { color: var(--accent, #4a7c6f); text-decoration: underline; }
+    #theme-toggle-map {
+      border: 1px solid var(--color-border, #ccc);
+      background: var(--bg-secondary, #f5f5f5);
+      border-radius: 20px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .map-home-main {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    /* skip extra reveal wrapper on home */
+    body.map-home .map-home-main .map-section > .reveal {
+      display: none;
+    }
+    .map-home-main .map-section {
+      max-width: none;
+      margin: 0;
+      padding: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      min-width: 0;
+    }
+    .map-home-main .map-container {
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-sizing: border-box;
+      border-radius: 0;
+      min-width: 0;
+      max-width: 100%;
+    }
+    .map-filter-dim { opacity: 0.15 !important; transition: opacity 0.2s ease; }
+    .map-filter-dim .room { transition: fill 0.15s ease, opacity 0.2s ease; }
+    @media (max-width: 900px) {
+      .map-home-topbar {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="map-home">
+  {% if session.get('dev_user') %}
+  <div style="background:#f59e0b;color:#1a1a1a;text-align:center;padding:5px 0;font-size:0.78rem;font-weight:700;letter-spacing:0.06em;z-index:9999;position:relative;flex-shrink:0;">
+    &#9888;&#65039; DEV MODE &mdash; admin/admin login active
+  </div>
+  {% endif %}
+  <header class="map-home-topbar map-topbar">
+    <a href="{{ url_for('index') }}" class="map-home-wordmark">Onelunch</a>
+    <div class="map-filters" id="map-filters">
+      <label><span aria-hidden="true">&#128269;</span> <input type="search" id="map-search" placeholder="Room #" autocomplete="off" aria-label="Room number search"></label>
+      <div class="chip-row" data-filter="floor" aria-label="Floor">
+        <span class="map-filter-label">Floor:</span>
+        <button type="button" class="chip active" data-value="all">All</button>
+        <button type="button" class="chip" data-value="1">1</button>
+        <button type="button" class="chip" data-value="2">2</button>
+      </div>
+      <div class="chip-row" data-filter="day" aria-label="Day">
+        <span class="map-filter-label">Day:</span>
+        <button type="button" class="chip active" data-value="all">All</button>
+        <button type="button" class="chip" data-value="M">M</button>
+        <button type="button" class="chip" data-value="T">T</button>
+        <button type="button" class="chip" data-value="W">W</button>
+        <button type="button" class="chip" data-value="R">R</button>
+        <button type="button" class="chip" data-value="F">F</button>
+      </div>
+      <div class="chip-row" data-filter="lunch" aria-label="Lunch">
+        <span class="map-filter-label">Lunch:</span>
+        <button type="button" class="chip active" data-value="all">All</button>
+        <button type="button" class="chip" data-value="A">A</button>
+        <button type="button" class="chip" data-value="B">B</button>
+      </div>
+    </div>
+    <div class="map-home-actions">
+      <a href="{{ url_for('teacher') }}" class="map-portal-link">Teacher portal →</a>
+      <button type="button" id="theme-toggle-map" aria-label="Toggle dark mode"><span class="theme-icon-map">&#127769;</span></button>
+    </div>
+  </header>
+  <div class="map-home-main" id="map-home-main">
+    {% include '_map_embed.html' %}
+  </div>
+  <a href="{{ url_for('club_request') }}" class="map-home-club-link">Request a club space →</a>
+  <script>
+    const ROOMS = {{ rooms | tojson }};
+    const CURRENT_DAY = "{{ current_day }}";
+    const CURRENT_LUNCH = "{{ current_lunch }}";
+
+    function roomLabelText(g) {
+      var label = g.querySelector('.room-label');
+      if (!label) return '';
+      var tspans = label.querySelectorAll('tspan');
+      if (tspans.length) {
+        var s = '';
+        tspans.forEach(function (ts) { s += ts.textContent.trim(); });
+        return s.trim();
+      }
+      return label.textContent.trim().replace(/\s+/g, ' ');
+    }
+
+    function syncRoomNumbers() {
+      document.querySelectorAll('.room-group').forEach(function (g) {
+        g.setAttribute('data-room-number', roomLabelText(g));
+      });
+    }
+
+    function keysFromGroupId(g) {
+      var id = (g.id || '');
+      var keys = [];
+      var m1 = id.match(/^room(\d+)$/i);
+      var m2 = id.match(/^s2room(\d+)$/i);
+      if (m1) keys.push(String(parseInt(m1[1], 10)));
+      if (m2) keys.push(String(parseInt(m2[1], 10)));
+      return keys;
+    }
+
+    function getRoomPayload(g) {
+      var labelKey = (g.getAttribute('data-room-number') || '').trim();
+      if (labelKey && ROOMS && ROOMS[labelKey]) return ROOMS[labelKey];
+      var keys = keysFromGroupId(g);
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        if (ROOMS && ROOMS[k]) return ROOMS[k];
+      }
+      for (var j = 0; j < keys.length; j++) {
+        var n = String(parseInt(keys[j], 10));
+        if (ROOMS && ROOMS[n]) return ROOMS[n];
+      }
+      return null;
+    }
+
+    function floorOfGroup(g) {
+      var id = (g.id || '');
+      if (id.indexOf('s2room') === 0) return '2';
+      if (id.indexOf('room') === 0) return '1';
+      return '';
+    }
+
+    function lunchMatches(amDay, lunch) {
+      if (!lunch || lunch === 'all') return true;
+      if (!amDay) return false;
+      if (amDay === 'AB') return true;
+      if (lunch === 'A') return amDay === 'A' || amDay === 'AB';
+      if (lunch === 'B') return amDay === 'B' || amDay === 'AB';
+      return amDay === lunch;
+    }
+
+    function groupMatchesFilters(g, searchQ, floorV, dayV, lunchV) {
+      var data = getRoomPayload(g);
+      var roomNumStr = data && data.room != null ? String(data.room) : (g.getAttribute('data-room-number') || '').trim();
+      if (searchQ && !roomNumStr.toLowerCase().startsWith(searchQ.toLowerCase())) return false;
+      if (floorV && floorV !== 'all') {
+        if (floorOfGroup(g) !== String(floorV)) return false;
+      }
+      var dayFilter = (dayV && dayV !== 'all') ? dayV : null;
+      var lunchFilter = (lunchV && lunchV !== 'all') ? lunchV : null;
+      if (!dayFilter && !lunchFilter) return true;
+      if (!data || !data.availability_map) return false;
+      if (dayFilter && lunchFilter) {
+        return lunchMatches(data.availability_map[dayFilter], lunchFilter);
+      }
+      if (dayFilter) {
+        var v = data.availability_map[dayFilter];
+        return !!(v && v !== 'N');
+      }
+      var d0 = CURRENT_DAY;
+      if (!d0) return false;
+      return lunchMatches(data.availability_map[d0], lunchFilter);
+    }
+
+    function filtersActive(searchQ, floorV, dayV, lunchV) {
+      return !!(searchQ || (floorV && floorV !== 'all') || (dayV && dayV !== 'all') || (lunchV && lunchV !== 'all'));
+    }
+
+    var apiStatusByNum = {};
+    function refreshApiColors(cb) {
+      fetch('/api/rooms')
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function (payload) {
+          apiStatusByNum = {};
+          var list = payload && (payload.rooms || payload);
+          if (!Array.isArray(list)) list = [];
+          list.forEach(function (room) {
+            if (room && room.number != null) {
+              apiStatusByNum[String(room.number).trim()] = room;
+            }
+          });
+          if (cb) cb();
+        })
+        .catch(function () { if (cb) cb(); });
+    }
+
+    function defaultFillForGroup(g) {
+      var num = (g.getAttribute('data-room-number') || '').trim();
+      var room = apiStatusByNum[num];
+      if (!room) {
+        var data = getRoomPayload(g);
+        if (data && data.status) room = { status: data.status };
+      }
+      var fill = '#888780';
+      if (room && room.status) {
+        fill = { open: '#639922', quiet_study: '#BA7517', closed: '#A32D2D' }[room.status] || '#888780';
+      }
+      return fill;
+    }
+
+    function accentColor() {
+      var st = getComputedStyle(document.documentElement);
+      var v = st.getPropertyValue('--accent').trim();
+      return v || '#4a7c6f';
+    }
+
+    function applyMapVisuals() {
+      var searchEl = document.getElementById('map-search');
+      var searchQ = (searchEl && searchEl.value) ? searchEl.value.trim() : '';
+      var floorV = document.querySelector('.chip-row[data-filter="floor"] .chip.active') && document.querySelector('.chip-row[data-filter="floor"] .chip.active').getAttribute('data-value');
+      var dayV = document.querySelector('.chip-row[data-filter="day"] .chip.active') && document.querySelector('.chip-row[data-filter="day"] .chip.active').getAttribute('data-value');
+      var lunchV = document.querySelector('.chip-row[data-filter="lunch"] .chip.active') && document.querySelector('.chip-row[data-filter="lunch"] .chip.active').getAttribute('data-value');
+      var active = filtersActive(searchQ, floorV, dayV, lunchV);
+      var acc = accentColor();
+      document.querySelectorAll('.room-group').forEach(function (g) {
+        g.classList.remove('map-filter-dim');
+        var shapes = g.querySelectorAll('rect.room, path.room, polygon.room');
+        if (!active) {
+          var fill = defaultFillForGroup(g);
+          shapes.forEach(function (el) { el.setAttribute('fill', fill); });
+          g.style.opacity = '';
+          return;
+        }
+        var ok = groupMatchesFilters(g, searchQ, floorV, dayV, lunchV);
+        if (ok) {
+          g.style.opacity = '';
+          shapes.forEach(function (el) { el.setAttribute('fill', acc); });
+        } else {
+          g.classList.add('map-filter-dim');
+          var baseFill = defaultFillForGroup(g);
+          shapes.forEach(function (el) { el.setAttribute('fill', baseFill); });
+        }
+      });
+    }
+
+    syncRoomNumbers();
+    refreshApiColors(function () {
+      applyMapVisuals();
+      setInterval(function () {
+        refreshApiColors(applyMapVisuals);
+      }, 60000);
+    });
+
+    document.querySelectorAll('.chip-row').forEach(function (row) {
+      row.querySelectorAll('.chip').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          row.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
+          btn.classList.add('active');
+          applyMapVisuals();
+        });
+      });
+    });
+    var ms = document.getElementById('map-search');
+    if (ms) ms.addEventListener('input', function () { applyMapVisuals(); });
+
+    (function themeBtn() {
+      var btn = document.getElementById('theme-toggle-map');
+      var icon = document.querySelector('.theme-icon-map');
+      function upd() {
+        var t = document.documentElement.getAttribute('data-theme');
+        if (icon) icon.textContent = t === 'dark' ? '\u2600\uFE0F' : '\uD83C\uDF19';
+      }
+      upd();
+      if (btn) btn.addEventListener('click', function () {
+        var cur = document.documentElement.getAttribute('data-theme');
+        var next = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        upd();
+        applyMapVisuals();
+      });
+    })();
+
+    (function enrichPanel() {
+      var panel = document.getElementById('room-panel');
+      if (!panel) return;
+      document.querySelectorAll('.room-group').forEach(function (g) {
+        g.addEventListener('click', function () {
+          var data = getRoomPayload(g);
+          var desc = document.getElementById('room-panel-desc');
+          if (!desc) return;
+          if (data) {
+            var parts = [];
+            if (data.teacher_name) parts.push(data.teacher_name);
+            if (data.office_hours) parts.push('Office: ' + data.office_hours);
+            if (data.todays_note) parts.push('Note: ' + data.todays_note);
+            desc.textContent = parts.length ? parts.join(' · ') : 'Room details';
+          } else {
+            desc.textContent = 'No schedule data for this room.';
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

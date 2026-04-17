@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Teacher sign up — Onelunch{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="container">
+    <h1>Create a teacher account</h1>
+    <p class="subtitle">Use your Henrico schools email as your login. Your account is ready as soon as you sign up.</p>
+    <form class="login" method="post" action="{{ url_for('register_teacher') }}">
+      {% include '_csrf.html' %}
+      <div class="input-group">
+        <label for="name">Full name</label>
+        <input type="text" id="name" name="name" required autocomplete="name" value="{{ form.name or '' }}">
+      </div>
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required autocomplete="email" placeholder="you@henrico.k12.va.us" value="{{ form.email or '' }}">
+        <span class="subtitle">Must be a @henrico.k12.va.us address.</span>
+      </div>
+      <div class="input-group">
+        <label for="department">Department</label>
+        <select id="department" name="department" required>
+          <option value="" disabled {% if not form.department %}selected{% endif %}>— Select —</option>
+          {% set d = form.department or '' %}
+          <option value="Math" {% if d == 'Math' %}selected{% endif %}>Math</option>
+          <option value="Science" {% if d == 'Science' %}selected{% endif %}>Science</option>
+          <option value="English" {% if d == 'English' %}selected{% endif %}>English</option>
+          <option value="History" {% if d == 'History' %}selected{% endif %}>History</option>
+          <option value="PE" {% if d == 'PE' %}selected{% endif %}>PE</option>
+          <option value="Art" {% if d == 'Art' %}selected{% endif %}>Art</option>
+          <option value="Music" {% if d == 'Music' %}selected{% endif %}>Music</option>
+          <option value="Special Ed" {% if d == 'Special Ed' %}selected{% endif %}>Special Ed</option>
+          <option value="Other" {% if d == 'Other' %}selected{% endif %}>Other</option>
+        </select>
+      </div>
+      <div class="input-group password">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password">
+        <button type="button" class="eye" aria-label="Show password" onclick="togglePassword('password', this)">&#128065;&#65039;</button>
+      </div>
+      <div class="input-group password">
+        <label for="password_confirm">Confirm password</label>
+        <input type="password" id="password_confirm" name="password_confirm" required minlength="6" autocomplete="new-password">
+        <button type="button" class="eye" aria-label="Show password" onclick="togglePassword('password_confirm', this)">&#128065;&#65039;</button>
+      </div>
+      <button type="submit" class="primary-btn">Create account</button>
+    </form>
+    <p class="subtitle" style="margin-top:1rem;">After signing up, log in with the same email and password.</p>
+    <div class="login-link"><a href="{{ url_for('login') }}">Already have an account? Log in</a></div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve onelunch
+After=network.target
+
+[Service]
+User=dgmiller1
+Group=www-data
+WorkingDirectory=/var/www/html/onelunch
+Environment="PATH=/var/www/html/onelunch/onelunchvenv/bin"
+ExecStart=/var/www/html/onelunch/onelunchvenv/bin/gunicorn --workers 3 --bind unix:onelunch.sock -m 007 app:app
+
+[Install]
+WantedBy=multi-user.target
