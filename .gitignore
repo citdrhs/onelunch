@@ -1,0 +1,28 @@
+# python bytecode and caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# local venv folders
+.venv/
+venv/
+env/
+
+# sqlite files from dev runs
+dev_local.db
+dev_local.db-wal
+dev_local.db-shm
+
+# secret env file
+.env
+
+# pytest cache
+.pytest_cache/
+
+# os noise
+.DS_Store
+Thumbs.db
+
+# archives
+*.zip

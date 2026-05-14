@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+{% block title %}Admin — Onelunch{% endblock %}
+{% block content %}
+<div class="page-card admin-page">
+  <div class="reveal">
+    <h1>Admin</h1>
+    <p class="subtitle">Manage users, rooms, roles, and department templates.</p>
+  </div>
+  <nav class="admin-tabs reveal">
+    <a href="{{ url_for('admin') }}#users">Users</a>
+    <a href="{{ url_for('admin') }}#rooms">Rooms</a>
+    <a href="{{ url_for('admin') }}#club-requests">Club Requests</a>
+    <a href="{{ url_for('admin_department_default') }}">Department defaults</a>
+    <a href="{{ url_for('admin_audit_log') }}">Audit log</a>
+  </nav>
+  <section class="card reveal" id="users">
+    <h2>Users</h2>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Email verified</th>
+          <th>Department</th>
+          <th>Club name</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>{{ u.name }}</td>
+          <td>{{ u.email }}</td>
+          <td>
+            <form method="post" action="{{ url_for('admin_set_role', user_id=u.id) }}" class="inline-form">
+              {% include '_csrf.html' %}
+              <select name="role" onchange="this.form.submit()">
+                <option value="teacher" {% if u.role == 'teacher' %}selected{% endif %}>Teacher</option>
+                <option value="student" {% if u.role == 'student' %}selected{% endif %}>Student</option>
+                <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>Admin</option>
+                <option value="club_president" {% if u.role == 'club_president' %}selected{% endif %}>Club president</option>
+              </select>
+            </form>
+          </td>
+          <td>
+            {% if u.role == 'teacher' %}
+            <span class="teacher-verify-badge" data-user-id="{{ u.id }}">{% if u.email_verified %}<span title="Verified" aria-label="Verified">✓ Verified</span>{% else %}<span class="admin-unverified" title="Unverified">Unverified</span>{% endif %}</span>
+            {% if not u.email_verified %}
+            <button type="button" class="btn btn-sm btn-secondary admin-verify-btn" data-admin-verify-user="{{ u.id }}">Manually verify</button>
+            {% endif %}
+            {% else %}
+            —
+            {% endif %}
+          </td>
+          <td>
+            <form method="post" action="{{ url_for('admin_set_department', user_id=u.id) }}" class="inline-form">
+              {% include '_csrf.html' %}
+              <input type="text" name="department" value="{{ u.department or '' }}" placeholder="Dept" size="10">
+              <button type="submit" class="btn btn-sm btn-secondary">Save</button>
+            </form>
+          </td>
+          <td>
+            {% if u.role == 'club_president' %}
+            <input type="text" class="club-name-input" data-user-id="{{ u.id }}" value="{{ u.club_name or '' }}" placeholder="Club name" maxlength="100" size="12"
+              onchange="setClubName({{ u.id }}, this.value)">
+            {% else %}—{% endif %}
+          </td>
+          <td>{{ u.created_at }}</td>
+          <td>
+            {% if u.id != session.user_id %}
+            <form method="post" action="{{ url_for('admin_delete_user', user_id=u.id) }}" class="inline-form" onsubmit="return confirm('Delete this user?');">
+              {% include '_csrf.html' %}
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8">No users.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  <section class="card reveal" id="rooms">
+    <h2>Rooms</h2>
+    <p class="subtitle">Edit fields and click <strong>Save room</strong> for each room. New installs get a default admin account when the app starts (see <code>.env.example</code>).</p>
+    {% for r in rooms %}
+    <form method="post" action="{{ url_for('admin_update_room', room_id=r.id) }}" class="admin-room-form reveal" style="margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--color-border, #e0dcd4);">
+      {% include '_csrf.html' %}
+      <h3 style="margin:0 0 0.75rem 0;font-size:1rem;">{{ r.dropdown_caption }}</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:0.75rem;align-items:end;">
+        <div class="input-group" style="margin:0;">
+          <label for="num-{{ r.id }}">Number</label>
+          <input id="num-{{ r.id }}" name="number" value="{{ r.number }}" required autocomplete="off">
+        </div>
+        <div class="input-group" style="margin:0;">
+          <label for="fl-{{ r.id }}">Floor</label>
+          <input id="fl-{{ r.id }}" name="floor" type="number" value="{{ r.floor }}" required>
+        </div>
+        <div class="input-group" style="margin:0;">
+          <label for="st-{{ r.id }}">Status</label>
+          <select id="st-{{ r.id }}" name="status">
+            <option value="open" {% if r.status == 'open' %}selected{% endif %}>open</option>
+            <option value="quiet_study" {% if r.status == 'quiet_study' %}selected{% endif %}>quiet_study</option>
+            <option value="closed" {% if r.status == 'closed' %}selected{% endif %}>closed</option>
+          </select>
+        </div>
+        <div class="input-group" style="margin:0;">
+          <label for="t-{{ r.id }}">Assigned teacher</label>
+          <select id="t-{{ r.id }}" name="teacher_id">
+            <option value="">— None —</option>
+            {% for u in users %}
+            {% if u.role in ('teacher', 'admin') %}
+            <option value="{{ u.id }}" {% if r.teacher_id == u.id %}selected{% endif %}>{{ u.name }} ({{ u.email }})</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <div class="input-group" style="margin:0;">
+          <label for="dept-{{ r.id }}">Department</label>
+          <input id="dept-{{ r.id }}" name="department" value="{{ r.department or '' }}" placeholder="Optional">
+        </div>
+        <div class="input-group" style="margin:0;grid-column:1/-1;">
+          <label for="oh-{{ r.id }}">Office hours</label>
+          <input id="oh-{{ r.id }}" name="office_hours" value="{{ r.office_hours or '' }}" placeholder="e.g. Mon A; Wed B">
+        </div>
+        <div class="input-group" style="margin:0;">
+          <label for="ld-{{ r.id }}">Lunch duty</label>
+          <input id="ld-{{ r.id }}" name="lunch_duty" value="{{ r.lunch_duty or '' }}">
+        </div>
+        <div class="input-group" style="margin:0;grid-column:1/-1;">
+          <label for="cm-{{ r.id }}">Club meeting</label>
+          <input id="cm-{{ r.id }}" name="club_meeting" value="{{ r.club_meeting or '' }}">
+        </div>
+      </div>
+      <p class="subtitle" style="margin:0.5rem 0 0 0;">Last updated: {{ r.updated_at or '—' }}</p>
+      <button type="submit" class="btn btn-primary" style="margin-top:0.75rem;">Save room</button>
+    </form>
+    {% else %}
+    <p class="subtitle">No rooms yet. Add one below.</p>
+    {% endfor %}
+
+    <h3 style="margin-top:1.5rem;">Add room</h3>
+    <form method="post" action="{{ url_for('admin_create_room') }}" class="admin-room-form">
+      {% include '_csrf.html' %}
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:0.75rem;align-items:end;">
+        <div class="input-group" style="margin:0;">
+          <label for="new-num">Number</label>
+          <input id="new-num" name="number" required placeholder="e.g. 230" autocomplete="off">
+        </div>
+        <div class="input-group" style="margin:0;">
+          <label for="new-fl">Floor</label>
+          <input id="new-fl" name="floor" type="number" value="1">
+        </div>
+        <div class="input-group" style="margin:0;">
+          <label for="new-st">Status</label>
+          <select id="new-st" name="status">
+            <option value="open" selected>open</option>
+            <option value="quiet_study">quiet_study</option>
+            <option value="closed">closed</option>
+          </select>
+        </div>
+        <div class="input-group" style="margin:0;">
+          <label for="new-t">Assigned teacher</label>
+          <select id="new-t" name="teacher_id">
+            <option value="">— None —</option>
+            {% for u in users %}
+            {% if u.role in ('teacher', 'admin') %}
+            <option value="{{ u.id }}">{{ u.name }} ({{ u.email }})</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <div class="input-group" style="margin:0;">
+          <label for="new-dept">Department</label>
+          <input id="new-dept" name="department" placeholder="Optional">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:0.75rem;">Create room</button>
+    </form>
+  </section>
+  <section class="card reveal" id="club-requests">
+    <h2>Club requests</h2>
+    <p class="subtitle">
+      <a href="{{ url_for('admin', club_status='all') }}">All</a>
+      ·
+      <a href="{{ url_for('admin', club_status='pending') }}">Pending</a>
+      ·
+      <a href="{{ url_for('admin', club_status='approved') }}">Approved</a>
+      ·
+      <a href="{{ url_for('admin', club_status='rejected') }}">Declined</a>
+    </p>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Club</th>
+          <th>Room</th>
+          <th>Day</th>
+          <th>Lunch</th>
+          <th>Half</th>
+          <th>Requester</th>
+          <th>Notes</th>
+          <th>Status</th>
+          <th>Room teacher</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for req in club_requests %}
+        <tr>
+          <td>{{ req.club_name }}</td>
+          <td>{{ req.room_number }}</td>
+          <td>{{ req.day }}</td>
+          <td>{{ req.lunch }}</td>
+          <td>{{ req.half }}</td>
+          <td>{{ req.requester_name }}{% if req.requester_email %}<br><small>{{ req.requester_email }}</small>{% endif %}</td>
+          <td>{{ req.notes or '—' }}</td>
+          <td>{{ req.status }}</td>
+          <td>{{ req.room_teacher_name or '—' }}</td>
+          <td>
+            {% if req.status == 'pending' %}
+            <form method="post" action="{{ url_for('api_club_request_approve', req_id=req.id) }}" style="display:inline;">
+              {% include '_csrf.html' %}
+              <button type="submit" class="btn btn-success btn-sm">Approve</button>
+            </form>
+            <form method="post" action="{{ url_for('api_club_request_decline', req_id=req.id) }}" style="display:inline;">
+              {% include '_csrf.html' %}
+              <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+            </form>
+            {% else %}
+            —
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="10">No club requests.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+<style>
+.admin-unverified { color: var(--color-danger, #b33); font-weight: 600; }
+</style>
+<script>
+function setClubName(id, val) {
+  fetch('/admin/user/' + id + '/club-name', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify({ club_name: val }),
+  }).then(function (r) {
+    if (!r.ok) alert('Could not save club name.');
+  }).catch(function () { alert('Request failed.'); });
+}
+document.querySelectorAll('.admin-verify-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var id = btn.getAttribute('data-admin-verify-user');
+    btn.disabled = true;
+    fetch('/admin/user/' + id + '/verify', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'same-origin',
+    })
+      .then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+      .then(function (result) {
+        if (result.ok && result.data && result.data.ok) {
+          var row = btn.closest('tr');
+          var cell = row.querySelector('.teacher-verify-badge');
+          if (cell) {
+            cell.innerHTML = '<span title="Verified" aria-label="Verified">✓ Verified</span>';
+          }
+          btn.remove();
+        } else {
+          alert((result.data && result.data.error) || 'Could not verify.');
+          btn.disabled = false;
+        }
+      })
+      .catch(function () {
+        alert('Request failed.');
+        btn.disabled = false;
+      });
+  });
+});
+</script>
+{% endblock %}

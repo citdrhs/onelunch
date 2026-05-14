@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Account — Onelunch{% endblock %}
+{% block content %}
+<div class="account-page">
+  <div class="card">
+    <div class="reveal">
+      <h1>Account settings</h1>
+      <p class="subtitle">{{ user.name }} · {{ user.email }} · {{ user.role }}</p>
+      {% if user.email_verified %}
+        <p class="email-status verified">✓ Email verified</p>
+      {% else %}
+        <p class="email-status unverified">⚠ Account not verified — ask an administrator to activate your teacher account.</p>
+      {% endif %}
+    </div>
+    {% if user.id == 0 %}
+    <p class="subtitle reveal">You are using the local demo login (<strong>admin</strong> / <strong>admin</strong>). Password and preferences are not stored.</p>
+    {% else %}
+    <section class="account-section reveal">
+      <h2>Change password</h2>
+      <form method="post" action="{{ url_for('account') }}" class="account-form">
+        {% include '_csrf.html' %}
+        <input type="hidden" name="action" value="change_password">
+        <div class="input-group password">
+          <label for="current_password">Current password</label>
+          <input type="password" id="current_password" name="current_password" required autocomplete="current-password">
+          <button type="button" class="eye" aria-label="Show password" onclick="togglePassword('current_password', this)">👁️</button>
+        </div>
+        <div class="input-group password">
+          <label for="new_password">New password</label>
+          <input type="password" id="new_password" name="new_password" required minlength="6" autocomplete="new-password">
+          <button type="button" class="eye" aria-label="Show password" onclick="togglePassword('new_password', this)">👁️</button>
+        </div>
+        <button type="submit" class="btn btn-primary">Update password</button>
+      </form>
+    </section>
+    <section class="account-section reveal">
+      <h2>Preferences</h2>
+      <form method="post" action="{{ url_for('account_preferences') }}" class="account-form">
+        {% include '_csrf.html' %}
+        <div class="input-group">
+          <label for="default_lunch">Default lunch</label>
+          <select id="default_lunch" name="default_lunch">
+            <option value="" {% if not user.default_lunch %}selected{% endif %}>No preference</option>
+            <option value="A" {% if user.default_lunch == 'A' %}selected{% endif %}>Lunch A</option>
+            <option value="B" {% if user.default_lunch == 'B' %}selected{% endif %}>Lunch B</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="default_floor">Default floor</label>
+          <select id="default_floor" name="default_floor">
+            <option value="" {% if user.default_floor is none %}selected{% endif %}>No preference</option>
+            <option value="1" {% if user.default_floor == 1 %}selected{% endif %}>Floor 1</option>
+            <option value="2" {% if user.default_floor == 2 %}selected{% endif %}>Floor 2</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Save preferences</button>
+      </form>
+    </section>
+    {% endif %}
+    {% if user.id != 0 %}
+    <section class="account-section danger reveal">
+      <h2>Delete account</h2>
+      <p>Permanently remove your account and all data. This can’t be undone.</p>
+      <form method="post" action="{{ url_for('account') }}" class="account-form" onsubmit="return confirm('Delete your account? This cannot be undone.');">
+        {% include '_csrf.html' %}
+        <input type="hidden" name="action" value="delete_account">
+        <button type="submit" class="btn btn-danger">Delete my account</button>
+      </form>
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

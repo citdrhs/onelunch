@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% if view == 'auth' %}Teacher portal — Onelunch{% else %}Set availability — Onelunch{% endif %}</title>
+  <script>
+    (function() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .teacher-portal-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3, 1rem);
+      padding: var(--space-3, 1rem) var(--space-4, 1.25rem);
+      border-bottom: 1px solid var(--border-color, rgba(0,0,0,.08));
+      position: sticky;
+      top: 0;
+      background: var(--bg-page, #fff);
+      z-index: 10;
+    }
+    .teacher-portal-bar a {
+      font-size: 0.9rem;
+      text-decoration: none;
+      color: var(--text-muted, #666);
+    }
+    .teacher-portal-bar a:hover { color: var(--accent, #0d6efd); }
+    .teacher-portal-bar .teacher-name-center {
+      font-weight: 600;
+      color: var(--text, #111);
+      text-align: center;
+      flex: 1;
+    }
+    .teacher-portal-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3, 1rem);
+    }
+    .teacher-auth-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: var(--space-6, 2rem) var(--space-4, 1.25rem);
+    }
+    .teacher-auth-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: var(--space-4, 1.25rem) var(--space-4, 1.25rem) 0;
+    }
+    .teacher-auth-top a.wordmark {
+      font-size: 1.15rem;
+      font-weight: 700;
+      text-decoration: none;
+      color: var(--text, #111);
+    }
+    .teacher-auth-top a.wordmark:hover { color: var(--accent, #0d6efd); }
+    .teacher-auth-tabs {
+      display: none;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: var(--space-4, 1.25rem);
+    }
+    .teacher-auth-tabs button {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border-color, #ddd);
+      background: var(--bg-card, #fafafa);
+      border-radius: 8px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .teacher-auth-tabs button[aria-selected="true"] {
+      border-color: var(--accent, #0d6efd);
+      background: var(--bg-page, #fff);
+    }
+    .teacher-auth-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-5, 1.5rem);
+      align-items: start;
+    }
+    .teacher-auth-card {
+      background: var(--bg-card, #fafafa);
+      border: 1px solid var(--border-color, #e5e5e5);
+      border-radius: 12px;
+      padding: var(--space-5, 1.5rem);
+    }
+    .teacher-auth-card h2 {
+      margin: 0 0 var(--space-4, 1.25rem);
+      font-size: 1.15rem;
+    }
+    @media (max-width: 768px) {
+      .teacher-auth-tabs { display: flex; }
+      .teacher-auth-grid { grid-template-columns: 1fr; }
+      .teacher-auth-grid .teacher-auth-card { display: none; }
+      .teacher-auth-grid[data-active-tab="login"] .teacher-auth-card-login,
+      .teacher-auth-grid[data-active-tab="signup"] .teacher-auth-card-signup { display: block; }
+    }
+    @media (min-width: 769px) {
+      .teacher-auth-grid .teacher-auth-card { display: block !important; }
+    }
+  </style>
+</head>
+<body class="app-shell">
+  {% if session.get('dev_user') %}
+  <div style="background:#f59e0b;color:#1a1a1a;text-align:center;padding:5px 0;font-size:0.78rem;font-weight:700;letter-spacing:0.06em;z-index:9999;position:relative;">
+    &#9888;&#65039; DEV MODE &mdash; admin/admin login active
+  </div>
+  {% endif %}
+{% if view == 'auth' %}
+  <div class="teacher-auth-top">
+    <a href="{{ url_for('index') }}" class="wordmark">Onelunch</a>
+    <button type="button" class="theme-toggle" id="theme-toggle-auth" onclick="toggleTheme()" aria-label="Toggle dark mode">
+      <span class="theme-icon">&#127769;</span>
+    </button>
+  </div>
+  <div class="teacher-auth-wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-messages">
+        {% for category, msg in messages %}
+        <div class="flash {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+    <div class="teacher-auth-tabs" id="teacher-auth-tabs" role="tablist">
+      <button type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="panel-login">Log in</button>
+      <button type="button" role="tab" id="tab-signup" aria-selected="false" aria-controls="panel-signup">Sign up</button>
+    </div>
+    <div class="teacher-auth-grid" id="teacher-auth-grid" data-active-tab="login">
+      <div class="teacher-auth-card teacher-auth-card-login" id="panel-login" role="tabpanel" aria-labelledby="tab-login">
+        <h2>Log in</h2>
+        <form class="login" method="post" action="{{ url_for('login') }}">
+          {% include '_csrf.html' %}
+          <div class="input-group">
+            <label for="login-email">Email</label>
+            <input type="text" id="login-email" name="email" autocomplete="username" required placeholder="Email or admin">
+          </div>
+          <div class="input-group password">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" name="password" autocomplete="current-password" required>
+            <button type="button" class="eye" aria-label="Show password" onclick="togglePassword('login-password', this)">&#128065;&#65039;</button>
+          </div>
+          <button type="submit" class="btn btn-primary">Log in</button>
+        </form>
+        <p class="subtitle" style="margin-top:1rem;"><a href="{{ url_for('forgot_password') }}">Forgot password?</a></p>
+        <p class="subtitle" style="margin-top:0.75rem;"><a href="{{ url_for('register_teacher') }}">Create account (full page)</a></p>
+      </div>
+      <div class="teacher-auth-card teacher-auth-card-signup" id="panel-signup" role="tabpanel" aria-labelledby="tab-signup">
+        <h2>Sign up</h2>
+        <form class="login" method="post" action="{{ url_for('register_teacher') }}">
+          {% include '_csrf.html' %}
+          <div class="input-group">
+            <label for="su-name">Name</label>
+            <input type="text" id="su-name" name="name" required autocomplete="name">
+          </div>
+          <div class="input-group">
+            <label for="su-email">Email</label>
+            <input type="email" id="su-email" name="email" required autocomplete="email" placeholder="you@henrico.k12.va.us">
+            <span class="subtitle">Must be a @henrico.k12.va.us address.</span>
+          </div>
+          <div class="input-group">
+            <label for="su-dept">Department</label>
+            <select id="su-dept" name="department" required>
+              <option value="" disabled selected>— Select —</option>
+              <option value="Math">Math</option>
+              <option value="Science">Science</option>
+              <option value="English">English</option>
+              <option value="History">History</option>
+              <option value="PE">PE</option>
+              <option value="Art">Art</option>
+              <option value="Music">Music</option>
+              <option value="Special Ed">Special Ed</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="input-group password">
+            <label for="su-password">Password</label>
+            <input type="password" id="su-password" name="password" autocomplete="new-password" required minlength="6">
+            <button type="button" class="eye" aria-label="Show password" onclick="togglePassword('su-password', this)">&#128065;&#65039;</button>
+          </div>
+          <div class="input-group password">
+            <label for="su-password2">Confirm password</label>
+            <input type="password" id="su-password2" name="password_confirm" autocomplete="new-password" required minlength="6">
+            <button type="button" class="eye" aria-label="Show password" onclick="togglePassword('su-password2', this)">&#128065;&#65039;</button>
+          </div>
+          <button type="submit" class="btn btn-primary">Create account</button>
+        </form>
+        <p class="subtitle" style="margin-top:1rem;">After signing up, log in with the same email and password.</p>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      var grid = document.getElementById('teacher-auth-grid');
+      var tabs = document.getElementById('teacher-auth-tabs');
+      if (!grid || !tabs) return;
+      function activate(name) {
+        grid.setAttribute('data-active-tab', name);
+        tabs.querySelectorAll('button[role="tab"]').forEach(function(btn) {
+          var on = btn.id === 'tab-' + name;
+          btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+      }
+      tabs.addEventListener('click', function(e) {
+        var t = e.target;
+        if (t.id === 'tab-login') activate('login');
+        if (t.id === 'tab-signup') activate('signup');
+      });
+    })();
+  </script>
+  <script>
+ (function() {
+      function setAuthIcon(theme) {
+        var icon = document.querySelector('#theme-toggle-auth .theme-icon');
+        if (icon) icon.textContent = theme === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
+      }
+      window.toggleTheme = function() {
+        var current = document.documentElement.getAttribute('data-theme');
+        var next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        setAuthIcon(next);
+      };
+      document.addEventListener('DOMContentLoaded', function() {
+        setAuthIcon(document.documentElement.getAttribute('data-theme') || 'light');
+      });
+    })();
+  </script>
+  <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% else %}
+  <header class="teacher-portal-bar">
+    <a href="{{ url_for('index') }}">← Back to map</a>
+    <span class="teacher-name-center">{{ user.name }}</span>
+    <div class="teacher-portal-actions">
+      <button type="button" class="theme-toggle" id="theme-toggle-dash" onclick="toggleTheme()" aria-label="Toggle dark mode">
+        <span class="theme-icon">&#127769;</span>
+      </button>
+      <a href="{{ url_for('logout') }}">Log out</a>
+    </div>
+  </header>
+  <main class="main-content" style="padding-top: 0;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-messages">
+        {% for category, msg in messages %}
+        <div class="flash {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+    <section class="teacher-section">
+      <div class="reveal">
+        <h1>Set your room availability</h1>
+        <p class="subtitle">When is your room open at lunch? Students see this so they know where to go.</p>
+      </div>
+
+      {% if user_room %}
+      <p class="my-room-link reveal"><a href="{{ url_for('index') }}#room-{{ user_room.number }}" class="btn btn-secondary">View my room ({{ user_room.number }}) on the map</a></p>
+      {% endif %}
+
+      {% if confirm_overwrite %}
+      <div class="flash error reveal">Room {{ confirm_overwrite }} is already assigned. Check the box below to confirm you want to take it over.</div>
+      {% endif %}
+
+      <form class="teacher-form card reveal" method="post" action="{{ url_for('teacher') }}" id="teacher-form">
+        {% include '_csrf.html' %}
+        <div class="input-group">
+          <label for="room">Room <span class="subtitle">(same list as the school map)</span></label>
+          {% if rooms %}
+          <select id="room" name="room" required>
+            <option value="" disabled {% if not user_room and not confirm_overwrite %}selected{% endif %}>— Select a room —</option>
+            {% for r in rooms %}
+            {% set st = (r.status or 'open')|replace('_', ' ') %}
+            <option value="{{ r.number }}" {% if user_room and user_room.number == r.number %}selected{% elif confirm_overwrite == r.number %}selected{% endif %}>{{ r.dropdown_caption }} — Floor {{ r.floor }} · {{ st }}{% if r.teacher_name %} · {{ r.teacher_name }}{% endif %}</option>
+            {% endfor %}
+          </select>
+          <p class="subtitle">Choose the room you’re setting up. Status matches what students see on the map (open, quiet study, closed).</p>
+          {% else %}
+          <p class="subtitle">No rooms are in the database yet. Ask an admin to add rooms or run the seed script, then reload this page.</p>
+          {% endif %}
+        </div>
+        <div class="input-group">
+          <label for="availability_note">Today’s note for students <span class="subtitle">(optional)</span></label>
+          <textarea id="availability_note" name="availability_note" maxlength="200" rows="3" placeholder="Optional — appears in the room panel on the map for today only.">{{ (user_room.todays_note if user_room else '') or '' }}</textarea>
+        </div>
+        <div class="input-group">
+          <label>Your name</label>
+          <input type="text" disabled value="{{ user.name }}">
+        </div>
+        {% if departments %}
+        <div class="department-defaults">
+          <label>Load department template</label>
+          <select id="department-template">
+            <option value="">— Select to load —</option>
+            {% for d in departments %}
+            <option value="{{ d.department }}" data-office="{{ d.office_hours or '' }}" data-duty="{{ d.lunch_duty or '' }}" data-avail="{{ d.default_avail | tojson | e }}">{{ d.department }}</option>
+            {% endfor %}
+          </select>
+          <button type="button" class="btn btn-secondary btn-sm" id="load-department-btn">Load template</button>
+        </div>
+        {% endif %}
+        <div class="input-group">
+          <label for="department">Department (optional)</label>
+          <input type="text" id="department" name="department" placeholder="e.g. History" value="{{ user_room.department if user_room else (user.department or '') }}">
+        </div>
+        <div class="input-group">
+          <label for="office_hours">Office hours</label>
+          <input type="text" id="office_hours" name="office_hours" placeholder="e.g. Wed & Thu B lunch; M–F 3–4pm" value="{{ user_room.office_hours if user_room else '' }}">
+        </div>
+        <div class="input-group">
+          <label for="lunch_duty">Lunch duty (when you’re not in room)</label>
+          <input type="text" id="lunch_duty" name="lunch_duty" placeholder="e.g. Wed & Fri A lunch" value="{{ user_room.lunch_duty if user_room else '' }}">
+        </div>
+        <div class="input-group">
+          <label for="club_meeting">Club meeting (if any)</label>
+          <input type="text" id="club_meeting" name="club_meeting" placeholder="e.g. Chess Club Thurs B lunch" value="{{ user_room.club_meeting if user_room else '' }}">
+        </div>
+        <fieldset class="days-fieldset">
+          <legend>Open for lunch (per day)</legend>
+          <div>
+            {% set map = user_room.avail_map if user_room else {} %}
+            <label>Mon <select name="day_M" id="day_M">
+              <option value="N" {% if map.get('M') == 'N' %}selected{% endif %}>Closed</option>
+              <option value="A" {% if map.get('M') == 'A' %}selected{% endif %}>A lunch</option>
+              <option value="B" {% if map.get('M') == 'B' %}selected{% endif %}>B lunch</option>
+              <option value="AB" {% if map.get('M') == 'AB' %}selected{% endif %}>Both lunches</option>
+            </select></label>
+            <label>Tue <select name="day_T" id="day_T">
+              <option value="N" {% if map.get('T') == 'N' %}selected{% endif %}>Closed</option>
+              <option value="A" {% if map.get('T') == 'A' %}selected{% endif %}>A lunch</option>
+              <option value="B" {% if map.get('T') == 'B' %}selected{% endif %}>B lunch</option>
+              <option value="AB" {% if map.get('T') == 'AB' %}selected{% endif %}>Both lunches</option>
+            </select></label>
+            <label>Wed <select name="day_W" id="day_W">
+              <option value="N" {% if map.get('W') == 'N' %}selected{% endif %}>Closed</option>
+              <option value="A" {% if map.get('W') == 'A' %}selected{% endif %}>A lunch</option>
+              <option value="B" {% if map.get('W') == 'B' %}selected{% endif %}>B lunch</option>
+              <option value="AB" {% if map.get('W') == 'AB' %}selected{% endif %}>Both lunches</option>
+            </select></label>
+            <label>Thu <select name="day_R" id="day_R">
+              <option value="N" {% if map.get('R') == 'N' %}selected{% endif %}>Closed</option>
+              <option value="A" {% if map.get('R') == 'A' %}selected{% endif %}>A lunch</option>
+              <option value="B" {% if map.get('R') == 'B' %}selected{% endif %}>B lunch</option>
+              <option value="AB" {% if map.get('R') == 'AB' %}selected{% endif %}>Both lunches</option>
+            </select></label>
+            <label>Fri <select name="day_F" id="day_F">
+              <option value="N" {% if map.get('F') == 'N' %}selected{% endif %}>Closed</option>
+              <option value="A" {% if map.get('F') == 'A' %}selected{% endif %}>A lunch</option>
+              <option value="B" {% if map.get('F') == 'B' %}selected{% endif %}>B lunch</option>
+              <option value="AB" {% if map.get('F') == 'AB' %}selected{% endif %}>Both lunches</option>
+            </select></label>
+          </div>
+        </fieldset>
+        {% if confirm_overwrite %}
+        <label class="confirm-overwrite">
+          <input type="checkbox" name="confirm_overwrite" value="1" required> I confirm I want to take over room {{ confirm_overwrite }}
+        </label>
+        {% endif %}
+        <button type="submit" class="btn btn-primary btn-submit" {% if not rooms %}disabled title="Add rooms to the database first"{% endif %}>Save availability</button>
+      </form>
+
+      {% if session.get('role') in ('teacher', 'admin') %}
+      <section class="card reveal" style="margin-top: var(--space-4);">
+        <h2>Club requests</h2>
+        {% if pending_list %}
+        <div style="overflow-x: auto;">
+          <table class="admin-table" style="min-width: 100%;">
+            <thead>
+              <tr>
+                <th>Club</th>
+                <th>Room</th>
+                <th>Day</th>
+                <th>Lunch</th>
+                <th>Half</th>
+                <th>Requester</th>
+                <th>Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in pending_list %}
+              <tr>
+                <td>{{ item.club_name }}</td>
+                <td>{{ item.room_number }}</td>
+                <td>{{ item.day }}</td>
+                <td>{{ item.lunch }}</td>
+                <td>{{ item.half }}</td>
+                <td>{{ item.requester or '—' }}</td>
+                <td>{{ item.notes or '—' }}</td>
+                <td>
+                  <form method="post" action="{{ url_for('api_club_request_approve', req_id=item.id) }}" style="display:inline;">
+                    {% include '_csrf.html' %}
+                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                  </form>
+                  <form method="post" action="{{ url_for('api_club_request_decline', req_id=item.id) }}" style="display:inline;">
+                    {% include '_csrf.html' %}
+                    <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="muted">No pending club requests.</p>
+        {% endif %}
+      </section>
+      {% endif %}
+
+      <div class="current-rooms card reveal">
+        <h2>All rooms</h2>
+        {% if rooms %}
+        <ul class="room-list">
+          {% for r in rooms %}
+          <li><strong>{{ r.dropdown_caption }}</strong> — {{ r.teacher_name or '—' }} · {{ r.office_hours or '—' }}</li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>No rooms yet. Add yours above.</p>
+        {% endif %}
+      </div>
+    </section>
+  </main>
+  <script>
+ (function() {
+    window.updateToggleIcon = function(theme) {
+      var icon = document.querySelector('#theme-toggle-dash .theme-icon');
+      if (icon) icon.textContent = theme === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
+    };
+    window.toggleTheme = function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      window.updateToggleIcon(next);
+    };
+    document.addEventListener('DOMContentLoaded', function() {
+      var theme = document.documentElement.getAttribute('data-theme');
+      window.updateToggleIcon(theme);
+    });
+    try {
+      window.updateToggleIcon(document.documentElement.getAttribute('data-theme') || 'light');
+    } catch (e) {}
+  })();
+  (function() {
+    var sel = document.getElementById('department-template');
+    var loadBtn = document.getElementById('load-department-btn');
+    if (sel && loadBtn) {
+      loadBtn.addEventListener('click', function() {
+        var opt = sel.options[sel.selectedIndex];
+        if (!opt || !opt.value) return;
+        var office = opt.getAttribute('data-office') || '';
+        var duty = opt.getAttribute('data-duty') || '';
+        document.getElementById('office_hours').value = office;
+        document.getElementById('lunch_duty').value = duty;
+        try {
+          var avail = JSON.parse(opt.getAttribute('data-avail') || '{}');
+          ['M','T','W','R','F'].forEach(function(d) {
+            var el = document.getElementById('day_' + d);
+            if (el && avail[d]) el.value = avail[d];
+          });
+        } catch (e) {}
+      });
+    }
+  })();
+  </script>
+  <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+{% endif %}
+</body>
+</html>

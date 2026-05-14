@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}Onelunch{% endblock %}</title>
+  {# set data-theme before css loads #}
+  <script>
+    (function() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body class="app-shell">
+  {% if session.get('dev_user') %}
+  <div style="background:#f59e0b;color:#1a1a1a;text-align:center;padding:5px 0;font-size:0.78rem;font-weight:700;letter-spacing:0.06em;z-index:9999;position:relative;">
+    &#9888;&#65039; DEV MODE &mdash; admin/admin login active
+  </div>
+  {% endif %}
+  <header class="site-header" id="site-header">
+    <a href="{{ url_for('index') }}" class="logo">Onelunch</a>
+    <button type="button" class="nav-toggle" aria-label="Toggle menu" id="nav-toggle" aria-expanded="false">
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+    </button>
+    <nav class="site-nav" id="site-nav">
+      <div class="nav-links" id="nav-links">
+      <a href="{{ url_for('index') }}">Map</a>
+      <a href="{{ url_for('club_request') }}">Club Request</a>
+      <a href="{{ url_for('teacher') }}">Teacher Portal</a>
+      {% if session.get('role') == 'admin' %}
+        <a href="{{ url_for('admin') }}">Admin</a>
+      {% endif %}
+      {% if session.get('user_id') %}
+        <a href="{{ url_for('account') }}">Account</a>
+        <a href="{{ url_for('logout') }}">Log out</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Log in</a>
+      {% endif %}
+      </div>
+      <button type="button" class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+        <span class="theme-icon">&#127769;</span>
+      </button>
+    </nav>
+  </header>
+  <main class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-messages">
+        {% for category, msg in messages %}
+        <div class="flash {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <p>Onelunch — Know where to go. Find your spot.</p>
+  </footer>
+  {% block scripts %}{% endblock %}
+  <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+  <script>
+  (function() {
+    var toggle = document.getElementById('nav-toggle');
+    var nav = document.getElementById('site-nav');
+    var navLinks = document.getElementById('nav-links');
+    var header = document.getElementById('site-header');
+    window.updateToggleIcon = function(theme) {
+      var icon = document.querySelector('.theme-icon');
+      if (icon) icon.textContent = theme === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
+    };
+
+    window.toggleTheme = function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      window.updateToggleIcon(next);
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var theme = document.documentElement.getAttribute('data-theme');
+      window.updateToggleIcon(theme);
+    });
+
+    try {
+      window.updateToggleIcon(document.documentElement.getAttribute('data-theme') || 'light');
+    } catch (e) {}
+
+    if (toggle && navLinks) {
+      toggle.addEventListener('click', function() {
+        var open = navLinks.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        nav.classList.toggle('open', open);
+      });
+    }
+    if (header) {
+      window.addEventListener('scroll', function() {
+        header.classList.toggle('scrolled', window.scrollY > 8);
+      });
+    }
+  })();
+  </script>
+</body>
+</html>
